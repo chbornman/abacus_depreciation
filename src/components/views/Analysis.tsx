@@ -29,7 +29,7 @@ export function Analysis({
   currentYear,
   onFilterByCategory,
 }: AnalysisProps) {
-  const [timeRange, setTimeRange] = useState<TimeRange>("next5");
+  const [timeRange, setTimeRange] = useState<TimeRange>("all");
 
   // Compute actual year range for display
   const yearRangeInfo = useMemo(() => {

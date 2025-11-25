@@ -195,15 +195,15 @@ export function CategoryPieChart({ assets, onCategoryClick, compact }: CategoryP
           : "flex items-center justify-center gap-8 min-h-[320px]"
         }>
           {/* Pie Chart */}
-          <div className={compact ? "flex-1 w-full min-h-0" : "w-[280px] h-[280px]"}>
+          <div className={compact ? "flex-1 w-full min-h-0 aspect-square max-h-[280px]" : "w-[280px] h-[280px]"}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={categoryData}
                   cx="50%"
                   cy="50%"
-                  innerRadius="22%"
-                  outerRadius="42%"
+                  innerRadius="30%"
+                  outerRadius="85%"
                   paddingAngle={2}
                   dataKey="value"
                   style={{ cursor: onCategoryClick ? "pointer" : "default" }}
