@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Abacus Depreciation
+Comment=Fixed asset depreciation tracking
+Exec=env WEBKIT_DISABLE_DMABUF_RENDERER=1 abacus-depreciation
+Icon=abacus-depreciation
+Terminal=false
+Type=Application
+Categories=Office;Finance;
