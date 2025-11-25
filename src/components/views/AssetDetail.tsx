@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, Pencil, Trash2, AlertTriangle } from "lucide-react";
+import { ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
-import { DisposeDialog } from "@/components/DisposeDialog";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { AssetWithSchedule } from "@/types";
 
@@ -30,7 +29,6 @@ interface AssetDetailProps {
   currentYear: number;
   onEdit: () => void;
   onDelete: () => void;
-  onDispose: (disposedDate: string, disposedValue: number | null) => void;
   onBack: () => void;
 }
 
@@ -39,10 +37,8 @@ export function AssetDetail({
   currentYear,
   onEdit,
   onDelete,
-  onDispose,
   onBack,
 }: AssetDetailProps) {
-  const [showDisposeDialog, setShowDisposeDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { asset: assetData, schedule, category_name } = asset;
@@ -55,11 +51,6 @@ export function AssetDetail({
     { label: "Useful Life", value: `${assetData.useful_life_years} years` },
     { label: "Property Class", value: assetData.property_class || "—" },
   ];
-
-  const handleDisposeConfirm = (disposedDate: string, disposedValue: number | null) => {
-    onDispose(disposedDate, disposedValue);
-    setShowDisposeDialog(false);
-  };
 
   const handleDeleteConfirm = () => {
     onDelete();
@@ -90,17 +81,6 @@ export function AssetDetail({
             <Pencil className="h-4 w-4" />
             Edit
           </Button>
-
-          {!assetData.disposed_date && (
-            <Button
-              variant="outline"
-              onClick={() => setShowDisposeDialog(true)}
-              className="gap-2"
-            >
-              <AlertTriangle className="h-4 w-4" />
-              Mark Disposed
-            </Button>
-          )}
 
           <Button
             variant="destructive"
@@ -270,14 +250,6 @@ export function AssetDetail({
           </Table>
         </CardContent>
       </Card>
-
-      {/* Dispose Dialog */}
-      <DisposeDialog
-        open={showDisposeDialog}
-        assetName={assetData.name}
-        onClose={() => setShowDisposeDialog(false)}
-        onConfirm={handleDisposeConfirm}
-      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

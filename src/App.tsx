@@ -4,15 +4,15 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 
 import { Sidebar } from "@/components/Sidebar";
 import { Toast } from "@/components/ui/toast";
+import { AssetFormDialog } from "@/components/AssetFormDialog";
 import {
   Dashboard,
   AssetList,
   AssetDetail,
-  AssetForm,
   Reports,
+  Manual,
   Settings,
 } from "@/components/views";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 import type {
   Asset,
@@ -25,7 +25,7 @@ import type {
 
 import "@/index.css";
 
-type View = "dashboard" | "assets" | "asset-detail" | "asset-form" | "reports" | "settings";
+type View = "dashboard" | "assets" | "asset-detail" | "reports" | "manual" | "settings";
 
 const STORAGE_KEY_SCALE = "abacus-ui-scale";
 const STORAGE_KEY_THEME = "abacus-theme";
@@ -43,6 +43,7 @@ function App() {
   const [annualSummary, setAnnualSummary] = useState<AnnualSummary[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<AssetWithSchedule | null>(null);
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+  const [assetFormOpen, setAssetFormOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -184,17 +185,25 @@ function App() {
     }
   };
 
-  const handleSaveAsset = async (asset: Asset) => {
+  const handleSaveAsset = async () => {
+    if (!editingAsset) return;
     try {
-      if (asset.id) {
-        await invoke("update_asset", { asset });
+      if (editingAsset.id) {
+        await invoke("update_asset", { asset: editingAsset });
         setSuccess("Asset updated successfully");
+        // Refresh the selected asset if we're on the detail view
+        if (selectedAsset && selectedAsset.asset.id === editingAsset.id) {
+          const updated = await invoke<AssetWithSchedule>("get_asset", {
+            id: editingAsset.id,
+          });
+          setSelectedAsset(updated);
+        }
       } else {
-        await invoke("create_asset", { asset });
+        await invoke("create_asset", { asset: editingAsset });
         setSuccess("Asset created successfully");
       }
       await loadData();
-      setView("assets");
+      setAssetFormOpen(false);
       setEditingAsset(null);
     } catch (e) {
       setError(String(e));
@@ -214,30 +223,9 @@ function App() {
     }
   };
 
-  const handleDisposeAsset = async (disposedDate: string, disposedValue: number | null) => {
-    if (!selectedAsset) return;
-
-    try {
-      await invoke("dispose_asset", {
-        id: selectedAsset.asset.id,
-        disposedDate,
-        disposedValue,
-      });
-      setSuccess("Asset marked as disposed");
-      await loadData();
-      const updated = await invoke<AssetWithSchedule>("get_asset", {
-        id: selectedAsset.asset.id,
-      });
-      setSelectedAsset(updated);
-    } catch (e) {
-      setError(String(e));
-    }
-  };
-
   const navigateTo = useCallback((newView: View) => {
     setView(newView);
     if (newView !== "asset-detail") setSelectedAsset(null);
-    if (newView !== "asset-form") setEditingAsset(null);
   }, []);
 
   const newAsset = (): Asset => ({
@@ -250,7 +238,7 @@ function App() {
 
   const handleAddAsset = useCallback(() => {
     setEditingAsset(newAsset());
-    setView("asset-form");
+    setAssetFormOpen(true);
   }, []);
 
   const handleViewAsset = useCallback((asset: AssetWithSchedule) => {
@@ -261,20 +249,13 @@ function App() {
   const handleEditAsset = useCallback(() => {
     if (selectedAsset) {
       setEditingAsset(selectedAsset.asset);
-      setView("asset-form");
+      setAssetFormOpen(true);
     }
   }, [selectedAsset]);
 
   const updateAssetField = <K extends keyof Asset>(field: K, value: Asset[K]) => {
     if (editingAsset) {
       setEditingAsset({ ...editingAsset, [field]: value });
-    }
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingAsset) {
-      handleSaveAsset(editingAsset);
     }
   };
 
@@ -315,19 +296,7 @@ function App() {
             currentYear={currentYear}
             onEdit={handleEditAsset}
             onDelete={handleDeleteAsset}
-            onDispose={handleDisposeAsset}
             onBack={() => navigateTo("assets")}
-          />
-        ) : null;
-      case "asset-form":
-        return editingAsset ? (
-          <AssetForm
-            asset={editingAsset}
-            categories={categories}
-            isEditing={!!editingAsset.id}
-            onChange={updateAssetField}
-            onSubmit={handleFormSubmit}
-            onCancel={() => navigateTo("assets")}
           />
         ) : null;
       case "reports":
@@ -339,6 +308,8 @@ function App() {
             onExportTemplate={handleExportTemplate}
           />
         );
+      case "manual":
+        return <Manual />;
       case "settings":
         return (
           <Settings
@@ -346,6 +317,7 @@ function App() {
             onScaleChange={handleScaleChange}
             theme={theme}
             onThemeChange={handleThemeChange}
+            onCategoriesChange={loadData}
           />
         );
       default:
@@ -368,11 +340,22 @@ function App() {
         onThemeChange={handleThemeChange}
       />
 
-      <main className="flex-1 min-w-0 overflow-hidden">
-        <ScrollArea className="h-full w-full">
-          <div className="p-6 lg:p-8 max-w-full overflow-x-hidden">{renderView()}</div>
-        </ScrollArea>
+      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
+        <div className="p-6 lg:p-8 max-w-full">{renderView()}</div>
       </main>
+
+      {/* Asset Form Dialog */}
+      <AssetFormDialog
+        open={assetFormOpen}
+        onOpenChange={(open) => {
+          setAssetFormOpen(open);
+          if (!open) setEditingAsset(null);
+        }}
+        asset={editingAsset}
+        categories={categories}
+        onChange={updateAssetField}
+        onSubmit={handleSaveAsset}
+      />
 
       {/* Toast Notifications */}
       {error && (
