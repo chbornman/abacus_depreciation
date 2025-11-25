@@ -38,7 +38,7 @@ export function Dashboard({
   onViewAllAssets,
   onFilterByCategory,
 }: DashboardProps) {
-  const [timeRange, setTimeRange] = useState<TimeRange>("5y");
+  const [timeRange, setTimeRange] = useState<TimeRange>("next5");
 
   // Compute actual year range for display
   const yearRangeInfo = useMemo(() => {
@@ -56,13 +56,13 @@ export function Dashboard({
         startYear = currentYear;
         endYear = currentYear;
         break;
-      case "3y":
-        startYear = currentYear - 2;
-        endYear = Math.min(currentYear + 10, maxYear);
+      case "next5":
+        startYear = currentYear;
+        endYear = currentYear + 4;
         break;
-      case "5y":
-        startYear = currentYear - 4;
-        endYear = Math.min(currentYear + 10, maxYear);
+      case "next10":
+        startYear = currentYear;
+        endYear = currentYear + 9;
         break;
       default: // "all"
         startYear = minYear;
@@ -179,10 +179,10 @@ export function Dashboard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
-                  <SelectItem value="5y">Last 5 Years</SelectItem>
-                  <SelectItem value="3y">Last 3 Years</SelectItem>
-                  <SelectItem value="1y">Current Year</SelectItem>
+                  <SelectItem value="all">Full Schedule</SelectItem>
+                  <SelectItem value="next10">Next 10 Years</SelectItem>
+                  <SelectItem value="next5">Next 5 Years</SelectItem>
+                  <SelectItem value="1y">This Year</SelectItem>
                 </SelectContent>
               </Select>
             </div>

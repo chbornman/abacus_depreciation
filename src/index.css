@@ -217,8 +217,17 @@ body {
 .app-container main {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: auto;
-  /* Create compositing layer for scroll performance */
-  will-change: scroll-position;
+}
+
+/* Isolate Recharts containers to prevent scroll jank */
+.recharts-responsive-container {
+  contain: layout paint style;
+}
+
+/* Put chart wrapper divs on their own compositing layer */
+.recharts-wrapper {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Scrollbar styling */

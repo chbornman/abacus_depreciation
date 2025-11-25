@@ -25,7 +25,7 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import type { AssetWithSchedule, AnnualSummary } from "@/types";
 
-export type TimeRange = "all" | "5y" | "3y" | "1y";
+export type TimeRange = "all" | "next5" | "next10" | "1y";
 
 interface TimeFilterProps {
   value: TimeRange;
@@ -39,9 +39,9 @@ export function TimeFilter({ value, onChange }: TimeFilterProps) {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">All Time</SelectItem>
-        <SelectItem value="5y">Last 5 Years</SelectItem>
-        <SelectItem value="3y">Last 3 Years</SelectItem>
+        <SelectItem value="all">Full Schedule</SelectItem>
+        <SelectItem value="next10">Next 10 Years</SelectItem>
+        <SelectItem value="next5">Next 5 Years</SelectItem>
         <SelectItem value="1y">This Year</SelectItem>
       </SelectContent>
     </Select>
@@ -49,16 +49,16 @@ export function TimeFilter({ value, onChange }: TimeFilterProps) {
 }
 
 function getYearRange(timeRange: TimeRange, currentYear: number): { startYear: number; endYear: number } {
-  const endYear = currentYear + 10; // Include future projections
   switch (timeRange) {
     case "1y":
       return { startYear: currentYear, endYear: currentYear };
-    case "3y":
-      return { startYear: currentYear - 2, endYear };
-    case "5y":
-      return { startYear: currentYear - 4, endYear };
+    case "next5":
+      return { startYear: currentYear, endYear: currentYear + 4 };
+    case "next10":
+      return { startYear: currentYear, endYear: currentYear + 9 };
     default:
-      return { startYear: 0, endYear };
+      // Full schedule - no bounds
+      return { startYear: 0, endYear: 9999 };
   }
 }
 
@@ -139,41 +139,41 @@ export function CategoryPieChart({ assets, onCategoryClick }: CategoryPieChartPr
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="text-base font-medium">Assets by Category</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex items-start gap-6">
+        <div className="flex items-center justify-center gap-8 min-h-[320px]">
           {/* Custom Legend List */}
-          <div className="flex-1 space-y-3 min-w-0 pt-2">
+          <div className="space-y-2.5 min-w-0">
             {categoryData.map((cat, index) => {
               const percentage = ((cat.value / totalValue) * 100).toFixed(1);
               return (
                 <button
                   key={cat.name}
                   onClick={() => handleCategoryClick(cat.name)}
-                  className="flex items-center gap-3 text-sm w-full text-left rounded-md p-1.5 -m-1.5 transition-colors hover:bg-muted/50"
+                  className="flex items-center gap-2.5 text-sm w-full text-left rounded-md p-1.5 -m-1.5 transition-colors hover:bg-muted/50"
                 >
+                  <span className="text-muted-foreground shrink-0 tabular-nums w-12 text-right">{percentage}%</span>
                   <div
                     className="h-3 w-3 rounded-sm shrink-0"
                     style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                   />
-                  <span className="truncate flex-1 text-foreground font-medium">{cat.name}</span>
-                  <span className="text-muted-foreground shrink-0 tabular-nums">{percentage}%</span>
+                  <span className="truncate text-foreground font-medium">{cat.name}</span>
                 </button>
               );
             })}
           </div>
-          {/* Pie Chart - Larger */}
-          <div className="h-[220px] w-[220px] shrink-0">
+          {/* Pie Chart - Large */}
+          <div className="h-[280px] w-[280px] shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={categoryData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={55}
-                  outerRadius={95}
+                  innerRadius={70}
+                  outerRadius={125}
                   paddingAngle={2}
                   dataKey="value"
                   style={{ cursor: onCategoryClick ? "pointer" : "default" }}
@@ -209,8 +209,7 @@ export function DepreciationBarChart({ annualSummary, currentYear, timeRange = "
     const { startYear, endYear } = getYearRange(timeRange, currentYear);
     return [...annualSummary]
       .filter((s) => s.year >= startYear && s.year <= endYear)
-      .sort((a, b) => a.year - b.year)
-      .slice(-10);
+      .sort((a, b) => a.year - b.year);
   }, [annualSummary, timeRange, currentYear]);
 
   if (chartData.length === 0) {
@@ -302,8 +301,7 @@ export function BookValueAreaChart({ assets, currentYear, timeRange = "all" }: B
     });
 
     return Object.values(yearlyData)
-      .sort((a, b) => a.year - b.year)
-      .slice(-10);
+      .sort((a, b) => a.year - b.year);
   }, [assets, timeRange, currentYear]);
 
   if (chartData.length === 0) {
