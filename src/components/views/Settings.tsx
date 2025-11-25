@@ -1,18 +1,23 @@
-import { Minus, Plus, RotateCcw, Monitor } from "lucide-react";
+import { Minus, Plus, RotateCcw, Monitor, Sun, Moon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+
+type Theme = "light" | "dark" | "system";
 
 interface SettingsProps {
   scale: number;
   onScaleChange: (scale: number) => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
 }
 
 const MIN_SCALE = 0.75;
 const MAX_SCALE = 2;
 const SCALE_INCREMENT = 0.1;
 
-export function Settings({ scale, onScaleChange }: SettingsProps) {
+export function Settings({ scale, onScaleChange, theme, onThemeChange }: SettingsProps) {
   const handleZoomIn = () => {
     const newScale = Math.min(MAX_SCALE, Math.round((scale + SCALE_INCREMENT) * 100) / 100);
     onScaleChange(newScale);
@@ -98,6 +103,69 @@ export function Settings({ scale, onScaleChange }: SettingsProps) {
 
           <Separator />
 
+          {/* Theme */}
+          <div className="space-y-4">
+            <div className="font-medium">Theme</div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => onThemeChange("light")}
+                className={cn(
+                  "flex flex-1 flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors",
+                  theme === "light"
+                    ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary))]/5"
+                    : "border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]/50"
+                )}
+              >
+                <Sun className={cn(
+                  "h-6 w-6",
+                  theme === "light" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                )} />
+                <span className={cn(
+                  "text-sm font-medium",
+                  theme === "light" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                )}>Light</span>
+              </button>
+              <button
+                onClick={() => onThemeChange("system")}
+                className={cn(
+                  "flex flex-1 flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors",
+                  theme === "system"
+                    ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary))]/5"
+                    : "border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]/50"
+                )}
+              >
+                <Monitor className={cn(
+                  "h-6 w-6",
+                  theme === "system" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                )} />
+                <span className={cn(
+                  "text-sm font-medium",
+                  theme === "system" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                )}>System</span>
+              </button>
+              <button
+                onClick={() => onThemeChange("dark")}
+                className={cn(
+                  "flex flex-1 flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors",
+                  theme === "dark"
+                    ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary))]/5"
+                    : "border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]/50"
+                )}
+              >
+                <Moon className={cn(
+                  "h-6 w-6",
+                  theme === "dark" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                )} />
+                <span className={cn(
+                  "text-sm font-medium",
+                  theme === "dark" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                )}>Dark</span>
+              </button>
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Keyboard Shortcuts Info */}
           <div className="space-y-3">
             <div className="font-medium">Keyboard Shortcuts</div>
@@ -150,7 +218,16 @@ export function Settings({ scale, onScaleChange }: SettingsProps) {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            <img src="/logo-black-minimal.svg" alt="Abacus" className="h-12 w-12" />
+            <img
+              src="/logo-black-minimal.svg"
+              alt="Abacus"
+              className="h-12 w-12 dark:hidden"
+            />
+            <img
+              src="/logo-white-minimal.svg"
+              alt="Abacus"
+              className="h-12 w-12 hidden dark:block"
+            />
             <div>
               <div className="font-bold tracking-widest">ABACUS</div>
               <div className="text-sm text-[hsl(var(--muted-foreground))]">

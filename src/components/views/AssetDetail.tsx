@@ -69,23 +69,23 @@ export function AssetDetail({
   return (
     <div className="space-y-6">
       {/* Breadcrumb & Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 text-sm min-w-0">
           <button
             onClick={onBack}
-            className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors"
+            className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors shrink-0"
           >
             Assets
           </button>
-          <ChevronRight className="h-4 w-4 text-[hsl(var(--muted-foreground))]" />
-          <span className="font-medium">{assetData.name}</span>
+          <ChevronRight className="h-4 w-4 text-[hsl(var(--muted-foreground))] shrink-0" />
+          <span className="font-medium truncate">{assetData.name}</span>
           {assetData.disposed_date && (
-            <Badge variant="destructive" className="ml-2">Disposed</Badge>
+            <Badge variant="destructive" className="ml-2 shrink-0">Disposed</Badge>
           )}
         </div>
 
         {/* All Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
           <Button variant="outline" onClick={onEdit} className="gap-2">
             <Pencil className="h-4 w-4" />
             Edit

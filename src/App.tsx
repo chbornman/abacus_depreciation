@@ -28,9 +28,12 @@ import "@/index.css";
 type View = "dashboard" | "assets" | "asset-detail" | "asset-form" | "reports" | "settings";
 
 const STORAGE_KEY_SCALE = "abacus-ui-scale";
+const STORAGE_KEY_THEME = "abacus-theme";
 const MIN_SCALE = 0.75;
 const MAX_SCALE = 2;
 const SCALE_INCREMENT = 0.1;
+
+type Theme = "light" | "dark" | "system";
 
 function App() {
   const [view, setView] = useState<View>("dashboard");
@@ -49,6 +52,12 @@ function App() {
     return saved ? parseFloat(saved) : 1;
   });
 
+  // Theme state - load from localStorage
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY_THEME);
+    return (saved as Theme) || "system";
+  });
+
   const currentYear = new Date().getFullYear();
 
   // Persist scale to localStorage and apply to document root
@@ -57,6 +66,30 @@ function App() {
     // Apply zoom to the root element for proper scaling
     document.documentElement.style.setProperty('--app-scale', scale.toString());
   }, [scale]);
+
+  // Apply theme to document and persist to localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_THEME, theme);
+
+    const applyTheme = (isDark: boolean) => {
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    };
+
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      applyTheme(mediaQuery.matches);
+
+      const handler = (e: MediaQueryListEvent) => applyTheme(e.matches);
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
+    } else {
+      applyTheme(theme === "dark");
+    }
+  }, [theme]);
 
   // Keyboard shortcuts for zoom
   useEffect(() => {
@@ -249,6 +282,10 @@ function App() {
     setScale(newScale);
   }, []);
 
+  const handleThemeChange = useCallback((newTheme: Theme) => {
+    setTheme(newTheme);
+  }, []);
+
   const renderView = () => {
     switch (view) {
       case "dashboard":
@@ -303,7 +340,14 @@ function App() {
           />
         );
       case "settings":
-        return <Settings scale={scale} onScaleChange={handleScaleChange} />;
+        return (
+          <Settings
+            scale={scale}
+            onScaleChange={handleScaleChange}
+            theme={theme}
+            onThemeChange={handleThemeChange}
+          />
+        );
       default:
         return null;
     }
@@ -320,11 +364,13 @@ function App() {
         onImport={handleImport}
         onExportTemplate={handleExportTemplate}
         onAddAsset={handleAddAsset}
+        theme={theme}
+        onThemeChange={handleThemeChange}
       />
 
       <main className="flex-1 min-w-0 overflow-hidden">
         <ScrollArea className="h-full w-full">
-          <div className="p-6 lg:p-8">{renderView()}</div>
+          <div className="p-6 lg:p-8 max-w-full overflow-x-hidden">{renderView()}</div>
         </ScrollArea>
       </main>
 

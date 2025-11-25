@@ -1,12 +1,12 @@
-/* Modern font - Inter */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* IBM Plex Sans - Professional font for financial/accounting software */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
 /* Tailwind v4 Theme */
 @theme {
   /* Font family */
-  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Border radius */
   --radius-sm: 0.375rem;
@@ -29,106 +29,120 @@
   }
 }
 
-/* CSS Custom Properties for theming */
+/* CSS Custom Properties for theming
+   Palette: Carbon Black #18191d, Blue Bell #5898d0, Soft Linen #ecebe3, Dim Grey #71655d
+*/
 :root {
-  /* Background colors */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  /* Background - Very light warm grey (layer 0) */
+  --background: 40 20% 97%;
+  --foreground: 228 9% 10%;
 
-  /* Card surfaces */
+  /* Card surfaces - Pure white (layer 1) */
   --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
+  --card-foreground: 228 9% 10%;
 
-  /* Popover/dropdown */
+  /* Popover/dropdown - White with subtle elevation */
   --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
+  --popover-foreground: 228 9% 10%;
 
-  /* Primary brand - Blue */
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
+  /* Primary brand - Blue Bell */
+  --primary: 208 58% 52%;
+  --primary-foreground: 0 0% 100%;
 
-  /* Secondary - Muted gray-blue */
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
+  /* Secondary - Subtle blue tint for interactive elements */
+  --secondary: 208 25% 96%;
+  --secondary-foreground: 228 9% 10%;
 
-  /* Muted backgrounds */
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  /* Muted backgrounds - Warm light grey */
+  --muted: 40 15% 95%;
+  --muted-foreground: 24 8% 45%;
 
-  /* Accent */
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  /* Accent - Light blue tint for hover/selected states */
+  --accent: 208 40% 94%;
+  --accent-foreground: 208 58% 40%;
 
-  /* Destructive - Red */
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  /* Destructive - Clean red */
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
 
-  /* Success - Green */
-  --success: 142.1 76.2% 36.3%;
-  --success-foreground: 355.7 100% 97.3%;
+  /* Success - Professional green */
+  --success: 152 55% 40%;
+  --success-foreground: 0 0% 100%;
 
-  /* Warning - Amber */
-  --warning: 45.4 93.4% 47.5%;
-  --warning-foreground: 26 83.3% 14.1%;
+  /* Warning - Warm amber */
+  --warning: 38 92% 50%;
+  --warning-foreground: 24 83% 14%;
 
-  /* Border and input */
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  /* Border - Subtle with blue tint for flair */
+  --border: 208 20% 88%;
+  --input: 208 15% 90%;
+  --ring: 208 58% 52%;
 
-  /* Sidebar - Darker surface */
-  --sidebar: 222.2 47.4% 11.2%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-accent: 217.2 32.6% 17.5%;
-  --sidebar-muted: 215 20.2% 65.1%;
+  /* Sidebar - Blue Bell accent */
+  --sidebar: 208 55% 35%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-accent: 208 55% 42%;
+  --sidebar-muted: 208 30% 75%;
 
-  /* Chart colors */
-  --chart-1: 221.2 83.2% 53.3%;
-  --chart-2: 142.1 76.2% 36.3%;
-  --chart-3: 45.4 93.4% 47.5%;
-  --chart-4: 262.1 83.3% 57.8%;
-  --chart-5: 0 84.2% 60.2%;
+  /* Chart colors - Vibrant but professional */
+  --chart-1: 208 58% 52%;
+  --chart-2: 152 55% 40%;
+  --chart-3: 38 92% 50%;
+  --chart-4: 280 45% 55%;
+  --chart-5: 0 72% 51%;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+  /* Background - Deep blue-black (layer 0) */
+  --background: 215 20% 9%;
+  --foreground: 210 20% 92%;
 
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
+  /* Card surfaces - Slightly lighter (layer 1) */
+  --card: 215 18% 13%;
+  --card-foreground: 210 20% 92%;
 
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
+  /* Popover/dropdown */
+  --popover: 215 18% 13%;
+  --popover-foreground: 210 20% 92%;
 
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
+  /* Primary brand - Blue Bell (brighter for dark) */
+  --primary: 208 60% 60%;
+  --primary-foreground: 215 20% 9%;
 
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+  /* Secondary - Blue tinted dark */
+  --secondary: 215 15% 18%;
+  --secondary-foreground: 210 20% 92%;
 
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
+  /* Muted */
+  --muted: 215 15% 18%;
+  --muted-foreground: 210 15% 55%;
 
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  /* Accent - Subtle blue highlight */
+  --accent: 208 30% 22%;
+  --accent-foreground: 208 60% 70%;
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  /* Destructive */
+  --destructive: 0 55% 50%;
+  --destructive-foreground: 210 20% 92%;
 
-  --success: 142.1 70.6% 45.3%;
-  --success-foreground: 144.9 80.4% 10%;
+  /* Success */
+  --success: 152 50% 50%;
+  --success-foreground: 215 20% 9%;
 
-  --warning: 48 96.5% 53%;
-  --warning-foreground: 26 83.3% 14.1%;
+  /* Warning */
+  --warning: 38 85% 55%;
+  --warning-foreground: 24 83% 14%;
 
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  /* Border and input - Blue tinted */
+  --border: 215 15% 22%;
+  --input: 215 15% 22%;
+  --ring: 208 60% 60%;
 
-  --sidebar: 222.2 84% 4.9%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-accent: 217.2 32.6% 17.5%;
-  --sidebar-muted: 215 20.2% 65.1%;
+  /* Sidebar - Darker blue */
+  --sidebar: 208 50% 18%;
+  --sidebar-foreground: 210 20% 95%;
+  --sidebar-accent: 208 45% 28%;
+  --sidebar-muted: 208 25% 60%;
 }
 
 /* Base styles */
@@ -136,21 +150,30 @@
   border-color: hsl(var(--border));
 }
 
-html, body, #root {
+html {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
-}
-
-body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 /* App container - fills viewport and handles zoom scaling */

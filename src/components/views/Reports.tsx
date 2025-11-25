@@ -29,14 +29,14 @@ export function Reports({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
           <p className="text-[hsl(var(--muted-foreground))]">
             Generate and export depreciation reports
           </p>
         </div>
-        <Button onClick={onExportReport} className="gap-2">
+        <Button onClick={onExportReport} className="gap-2 shrink-0">
           <Download className="h-4 w-4" />
           Export to Excel
         </Button>

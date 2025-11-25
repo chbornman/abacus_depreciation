@@ -29,14 +29,14 @@ export function AssetList({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight">Assets</h1>
           <p className="text-[hsl(var(--muted-foreground))]">
             Manage your fixed assets and view depreciation details
           </p>
         </div>
-        <Button onClick={onAddAsset} className="gap-2">
+        <Button onClick={onAddAsset} className="gap-2 shrink-0">
           <Plus className="h-4 w-4" />
           Add Asset
         </Button>

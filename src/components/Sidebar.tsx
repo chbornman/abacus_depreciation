@@ -1,9 +1,10 @@
-import { LayoutDashboard, Package, FileText, Upload, Download, Plus, Settings } from "lucide-react";
+import { LayoutDashboard, Package, FileText, Upload, Download, Plus, Settings, Sun, Moon, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 type View = "dashboard" | "assets" | "asset-detail" | "asset-form" | "reports" | "settings";
+type Theme = "light" | "dark" | "system";
 
 interface SidebarProps {
   currentView: View;
@@ -11,6 +12,8 @@ interface SidebarProps {
   onImport: () => void;
   onExportTemplate: () => void;
   onAddAsset: () => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
 }
 
 export function Sidebar({
@@ -19,6 +22,8 @@ export function Sidebar({
   onImport,
   onExportTemplate,
   onAddAsset,
+  theme,
+  onThemeChange,
 }: SidebarProps) {
   const navItems = [
     { id: "dashboard" as View, label: "Dashboard", icon: LayoutDashboard },
@@ -37,14 +42,9 @@ export function Sidebar({
   return (
     <aside className="flex h-full min-h-0 w-64 shrink-0 flex-col bg-[hsl(var(--sidebar))] text-[hsl(var(--sidebar-foreground))]">
       {/* Logo & Brand */}
-      <div className="flex items-center gap-3 px-6 py-6">
-        <div className="flex h-14 w-14 items-center justify-center">
-          <img src="/logo-white-minimal.svg" alt="Abacus" className="h-14 w-14" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-lg font-bold tracking-widest">ABACUS</span>
-          <span className="text-xs text-[hsl(var(--sidebar-muted))]">Depreciation Tracker</span>
-        </div>
+      <div className="shrink-0 flex items-center justify-center gap-4 px-6 py-8">
+        <img src="/logo-white-minimal.svg" alt="Abacus" className="h-12 w-12" />
+        <span className="text-3xl font-bold tracking-wider">ABACUS</span>
       </div>
 
       <Separator className="bg-[hsl(var(--sidebar-accent))]" />
@@ -73,7 +73,7 @@ export function Sidebar({
       </nav>
 
       {/* Actions */}
-      <div className="space-y-2 px-3 pb-3">
+      <div className="shrink-0 space-y-2 px-3 pb-3">
         <Separator className="bg-[hsl(var(--sidebar-accent))] mb-3" />
         <button
           onClick={onImport}
@@ -91,8 +91,48 @@ export function Sidebar({
         </button>
       </div>
 
+      {/* Theme Toggle */}
+      <div className="shrink-0 px-3 pb-2">
+        <Separator className="bg-[hsl(var(--sidebar-accent))] mb-3" />
+        <div className="flex items-center justify-between rounded-lg bg-[hsl(var(--sidebar-accent))]/30 p-1">
+          <button
+            onClick={() => onThemeChange("light")}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+              theme === "light"
+                ? "bg-[hsl(var(--sidebar-accent))] text-white"
+                : "text-[hsl(var(--sidebar-muted))] hover:text-white"
+            )}
+          >
+            <Sun className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => onThemeChange("system")}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+              theme === "system"
+                ? "bg-[hsl(var(--sidebar-accent))] text-white"
+                : "text-[hsl(var(--sidebar-muted))] hover:text-white"
+            )}
+          >
+            <Monitor className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => onThemeChange("dark")}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+              theme === "dark"
+                ? "bg-[hsl(var(--sidebar-accent))] text-white"
+                : "text-[hsl(var(--sidebar-muted))] hover:text-white"
+            )}
+          >
+            <Moon className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
       {/* Add Asset Button */}
-      <div className="p-3">
+      <div className="shrink-0 p-3">
         <Button onClick={onAddAsset} className="w-full gap-2" size="lg">
           <Plus className="h-4 w-4" />
           Add Asset
