@@ -23,6 +23,7 @@ pub fn run() {
             commands::create_category,
             commands::update_category,
             commands::delete_category,
+            commands::move_assets_and_delete_category,
             // Assets
             commands::get_assets,
             commands::get_asset,

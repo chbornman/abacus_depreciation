@@ -63,6 +63,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
   const [categoryToDelete, setCategoryToDelete] = useState<CategoryWithCount | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [targetCategoryId, setTargetCategoryId] = useState<string>("");
 
   const loadCategories = async () => {
     try {
@@ -104,6 +105,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
   const handleDeleteClick = (category: CategoryWithCount) => {
     setCategoryToDelete(category);
     setDeleteError(null);
+    setTargetCategoryId("");
     setDeleteDialogOpen(true);
   };
 
@@ -144,6 +146,28 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
       await invoke("delete_category", { id: categoryToDelete.id });
       setDeleteDialogOpen(false);
       setCategoryToDelete(null);
+      await loadCategories();
+      onCategoriesChange?.();
+    } catch (err) {
+      setDeleteError(err as string);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleMoveAndDelete = async () => {
+    if (!categoryToDelete || !targetCategoryId) return;
+
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await invoke("move_assets_and_delete_category", {
+        fromCategoryId: categoryToDelete.id,
+        toCategoryId: parseInt(targetCategoryId, 10),
+      });
+      setDeleteDialogOpen(false);
+      setCategoryToDelete(null);
+      setTargetCategoryId("");
       await loadCategories();
       onCategoriesChange?.();
     } catch (err) {
@@ -327,25 +351,57 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
               </div>
             )}
             {categoryToDelete && categoryToDelete.asset_count > 0 && !deleteError && (
-              <div className="flex items-start gap-2 rounded-lg bg-warning/10 p-3 text-sm text-amber-600 dark:text-amber-500">
-                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span>
-                  This category has {categoryToDelete.asset_count} asset{categoryToDelete.asset_count !== 1 ? "s" : ""}.
-                  You must reassign them to a different category before deleting.
-                </span>
+              <div className="space-y-4">
+                <div className="flex items-start gap-2 rounded-lg bg-warning/10 p-3 text-sm text-amber-600 dark:text-amber-500">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>
+                    This category has {categoryToDelete.asset_count} asset{categoryToDelete.asset_count !== 1 ? "s" : ""}.
+                    Select a category to move them to before deleting.
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="target-category">Move assets to</Label>
+                  <Select
+                    value={targetCategoryId}
+                    onValueChange={setTargetCategoryId}
+                  >
+                    <SelectTrigger id="target-category">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories
+                        .filter((c) => c.id !== categoryToDelete.id)
+                        .map((c) => (
+                          <SelectItem key={c.id} value={String(c.id)}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={deleting || (categoryToDelete?.asset_count ?? 0) > 0}
-              >
-                {deleting ? "Deleting..." : "Delete Category"}
-              </Button>
+              {categoryToDelete && categoryToDelete.asset_count > 0 ? (
+                <Button
+                  variant="destructive"
+                  onClick={handleMoveAndDelete}
+                  disabled={deleting || !targetCategoryId}
+                >
+                  {deleting ? "Moving..." : "Move Assets and Delete"}
+                </Button>
+              ) : (
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? "Deleting..." : "Delete Category"}
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

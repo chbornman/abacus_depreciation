@@ -156,6 +156,41 @@ pub fn delete_category(db: State<Database>, id: i64) -> Result<()> {
 }
 
 #[tauri::command]
+pub fn move_assets_and_delete_category(
+    db: State<Database>,
+    from_category_id: i64,
+    to_category_id: i64,
+) -> Result<()> {
+    let conn = db.conn.lock().map_err(map_err)?;
+
+    // Verify target category exists
+    let target_exists: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM categories WHERE id = ?1)",
+            [to_category_id],
+            |row| row.get(0),
+        )
+        .map_err(map_err)?;
+
+    if !target_exists {
+        return Err("Target category does not exist".to_string());
+    }
+
+    // Move all assets to the target category
+    conn.execute(
+        "UPDATE assets SET category_id = ?1, updated_at = CURRENT_TIMESTAMP WHERE category_id = ?2",
+        params![to_category_id, from_category_id],
+    )
+    .map_err(map_err)?;
+
+    // Delete the now-empty category
+    conn.execute("DELETE FROM categories WHERE id = ?1", [from_category_id])
+        .map_err(map_err)?;
+
+    Ok(())
+}
+
+#[tauri::command]
 pub fn get_categories_with_counts(db: State<Database>) -> Result<Vec<CategoryWithCount>> {
     let conn = db.conn.lock().map_err(map_err)?;
     let mut stmt = conn
