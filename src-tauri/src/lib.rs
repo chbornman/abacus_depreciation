@@ -3,6 +3,7 @@ mod db;
 mod depreciation;
 mod excel;
 mod models;
+mod validation;
 
 use db::Database;
 

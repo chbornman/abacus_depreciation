@@ -34,7 +34,8 @@ impl Database {
                 name TEXT NOT NULL UNIQUE,
                 default_useful_life INTEGER,
                 default_property_class TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             -- Core asset records
@@ -74,6 +75,20 @@ impl Database {
             CREATE INDEX IF NOT EXISTS idx_schedule_asset ON depreciation_schedule(asset_id);
             "
         )?;
+
+        // Add updated_at column to categories if it doesn't exist (for existing databases)
+        let has_updated_at: bool = conn
+            .prepare("SELECT COUNT(*) FROM pragma_table_info('categories') WHERE name = 'updated_at'")?
+            .query_row([], |row| row.get::<_, i64>(0))
+            .map(|count| count > 0)
+            .unwrap_or(false);
+
+        if !has_updated_at {
+            conn.execute(
+                "ALTER TABLE categories ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP",
+                [],
+            )?;
+        }
 
         Ok(())
     }

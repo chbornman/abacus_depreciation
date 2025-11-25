@@ -2,6 +2,11 @@ use crate::models::{Asset, DepreciationEntry};
 
 /// Generate straight-line depreciation schedule for an asset
 pub fn generate_schedule(asset: &Asset) -> Vec<DepreciationEntry> {
+    // Guard against division by zero
+    if asset.useful_life_years < 1 {
+        return Vec::new();
+    }
+
     let asset_id = asset.id.unwrap_or(0);
     let depreciable_base = asset.cost - asset.salvage_value;
     let annual_depreciation = depreciable_base / asset.useful_life_years as f64;
@@ -53,6 +58,11 @@ pub fn generate_schedule(asset: &Asset) -> Vec<DepreciationEntry> {
 
 /// Calculate current book value for an asset as of a given year
 pub fn current_book_value(asset: &Asset, as_of_year: i32) -> f64 {
+    // Guard against division by zero
+    if asset.useful_life_years < 1 {
+        return asset.cost;
+    }
+
     let start_year: i32 = asset
         .date_placed_in_service
         .split('-')
@@ -69,6 +79,11 @@ pub fn current_book_value(asset: &Asset, as_of_year: i32) -> f64 {
 
 /// Get depreciation expense for a specific year
 pub fn depreciation_for_year(asset: &Asset, year: i32) -> f64 {
+    // Guard against division by zero
+    if asset.useful_life_years < 1 {
+        return 0.0;
+    }
+
     let start_year: i32 = asset
         .date_placed_in_service
         .split('-')

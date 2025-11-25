@@ -60,46 +60,80 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* UI Scale */}
-          <div className="space-y-4">
-            <div className="font-medium">Interface Scale</div>
+          {/* UI Scale and Keyboard Shortcuts Row */}
+          <div className="flex items-start gap-8">
+            {/* UI Scale */}
+            <div className="space-y-4">
+              <div className="font-medium">Interface Scale</div>
 
-            {/* Simple Scale Controls */}
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleZoomOut}
-                disabled={scale <= MIN_SCALE}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
+              {/* Simple Scale Controls */}
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleZoomOut}
+                  disabled={scale <= MIN_SCALE}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
 
-              <div className="min-w-[80px] text-center">
-                <span className="text-2xl font-bold text-primary">
-                  {scalePercent}%
-                </span>
+                <div className="min-w-[80px] text-center">
+                  <span className="text-2xl font-bold text-primary">
+                    {scalePercent}%
+                  </span>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleZoomIn}
+                  disabled={scale >= MAX_SCALE}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleReset}
+                  disabled={scale === 1}
+                  className="gap-2 ml-2"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Reset
+                </Button>
               </div>
+            </div>
 
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleZoomIn}
-                disabled={scale >= MAX_SCALE}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                disabled={scale === 1}
-                className="gap-2 ml-2"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Reset
-              </Button>
+            {/* Keyboard Shortcuts */}
+            <div className="space-y-4">
+              <div className="font-medium">Keyboard Shortcuts</div>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                  <span className="text-muted-foreground">Zoom In</span>
+                  <div className="flex items-center gap-1">
+                    <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">Ctrl</kbd>
+                    <span>+</span>
+                    <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">+</kbd>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                  <span className="text-muted-foreground">Zoom Out</span>
+                  <div className="flex items-center gap-1">
+                    <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">Ctrl</kbd>
+                    <span>+</span>
+                    <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">-</kbd>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                  <span className="text-muted-foreground">Reset</span>
+                  <div className="flex items-center gap-1">
+                    <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">Ctrl</kbd>
+                    <span>+</span>
+                    <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">0</kbd>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -163,51 +197,6 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
                   theme === "dark" ? "text-primary" : "text-muted-foreground"
                 )}>Dark</span>
               </button>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Keyboard Shortcuts Info */}
-          <div className="space-y-3">
-            <div className="font-medium">Keyboard Shortcuts</div>
-            <div className="grid gap-2 text-sm">
-              <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
-                <span className="text-muted-foreground">Zoom In</span>
-                <div className="flex items-center gap-1">
-                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
-                    Ctrl
-                  </kbd>
-                  <span>+</span>
-                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
-                    +
-                  </kbd>
-                </div>
-              </div>
-              <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
-                <span className="text-muted-foreground">Zoom Out</span>
-                <div className="flex items-center gap-1">
-                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
-                    Ctrl
-                  </kbd>
-                  <span>+</span>
-                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
-                    -
-                  </kbd>
-                </div>
-              </div>
-              <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
-                <span className="text-muted-foreground">Reset Zoom</span>
-                <div className="flex items-center gap-1">
-                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
-                    Ctrl
-                  </kbd>
-                  <span>+</span>
-                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
-                    0
-                  </kbd>
-                </div>
-              </div>
             </div>
           </div>
         </CardContent>

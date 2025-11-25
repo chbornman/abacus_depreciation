@@ -78,6 +78,7 @@ interface DatePickerProps {
   disabled?: boolean;
   required?: boolean;
   id?: string;
+  className?: string;
 }
 
 function DatePicker({
@@ -86,6 +87,7 @@ function DatePicker({
   placeholder = "Pick a date",
   disabled,
   id,
+  className,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -107,7 +109,8 @@ function DatePicker({
           disabled={disabled}
           className={cn(
             "w-full justify-start text-left font-normal",
-            !value && "text-muted-foreground"
+            !value && "text-muted-foreground",
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />

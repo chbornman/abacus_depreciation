@@ -1,15 +1,21 @@
-import { TrendingUp, DollarSign, Calculator, Briefcase, ChevronRight, Package } from "lucide-react";
+import { useState, useMemo } from "react";
+import { TrendingUp, DollarSign, Calculator, Briefcase, ChevronRight, Package, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  CategoryPieChart,
+  DepreciationBarChart,
+  BookValueAreaChart,
+  type TimeRange,
+} from "@/components/charts/DashboardCharts";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import type { DashboardStats, AssetWithSchedule, AnnualSummary } from "@/types";
 
@@ -20,6 +26,7 @@ interface DashboardProps {
   currentYear: number;
   onViewAsset: (asset: AssetWithSchedule) => void;
   onViewAllAssets: () => void;
+  onFilterByCategory: (categoryName: string) => void;
 }
 
 export function Dashboard({
@@ -29,7 +36,58 @@ export function Dashboard({
   currentYear,
   onViewAsset,
   onViewAllAssets,
+  onFilterByCategory,
 }: DashboardProps) {
+  const [timeRange, setTimeRange] = useState<TimeRange>("5y");
+
+  // Compute actual year range for display
+  const yearRangeInfo = useMemo(() => {
+    if (annualSummary.length === 0) return null;
+
+    const allYears = annualSummary.map(s => s.year).sort((a, b) => a - b);
+    const minYear = allYears[0];
+    const maxYear = allYears[allYears.length - 1];
+
+    let startYear: number;
+    let endYear: number;
+
+    switch (timeRange) {
+      case "1y":
+        startYear = currentYear;
+        endYear = currentYear;
+        break;
+      case "3y":
+        startYear = currentYear - 2;
+        endYear = Math.min(currentYear + 10, maxYear);
+        break;
+      case "5y":
+        startYear = currentYear - 4;
+        endYear = Math.min(currentYear + 10, maxYear);
+        break;
+      default: // "all"
+        startYear = minYear;
+        endYear = maxYear;
+    }
+
+    // Clamp to available data
+    startYear = Math.max(startYear, minYear);
+    endYear = Math.min(endYear, maxYear);
+
+    const filteredCount = annualSummary.filter(
+      s => s.year >= startYear && s.year <= endYear
+    ).length;
+
+    return {
+      startYear,
+      endYear,
+      totalYears: allYears.length,
+      filteredYears: filteredCount,
+      label: startYear === endYear
+        ? `${startYear}`
+        : `${startYear} – ${endYear}`,
+    };
+  }, [annualSummary, timeRange, currentYear]);
+
   const statCards = stats
     ? [
         {
@@ -90,14 +148,89 @@ export function Dashboard({
         </div>
       )}
 
+      {/* Portfolio Composition - Always shows all assets */}
+      {assets.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Portfolio Composition</h2>
+              <p className="text-sm text-muted-foreground">
+                All {assets.length} assets by category • Click to filter
+              </p>
+            </div>
+          </div>
+          <CategoryPieChart assets={assets} onCategoryClick={onFilterByCategory} />
+        </div>
+      )}
+
+      {/* Depreciation Trends - Time filtered */}
+      {annualSummary.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Depreciation Trends</h2>
+              <p className="text-sm text-muted-foreground">
+                Track depreciation expenses and book value over time
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Years</SelectItem>
+                  <SelectItem value="5y">Last 5 Years</SelectItem>
+                  <SelectItem value="3y">Last 3 Years</SelectItem>
+                  <SelectItem value="1y">Current Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Time Range Indicator */}
+          {yearRangeInfo && timeRange !== "all" && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground rounded-lg bg-muted/50 px-3 py-2 w-fit">
+              <Calendar className="h-4 w-4" />
+              <span>
+                Showing <span className="font-medium text-foreground">{yearRangeInfo.label}</span>
+                {yearRangeInfo.filteredYears !== yearRangeInfo.totalYears && (
+                  <span> ({yearRangeInfo.filteredYears} of {yearRangeInfo.totalYears} years)</span>
+                )}
+              </span>
+            </div>
+          )}
+
+          <div className="grid gap-4 grid-cols-1">
+            <DepreciationBarChart
+              annualSummary={annualSummary}
+              currentYear={currentYear}
+              timeRange={timeRange}
+            />
+            <BookValueAreaChart
+              assets={assets}
+              currentYear={currentYear}
+              timeRange={timeRange}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Recent Assets */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Recent Assets</h2>
-          <Button variant="ghost" size="sm" onClick={onViewAllAssets}>
-            View All
-            <ChevronRight className="ml-1 h-4 w-4" />
-          </Button>
+          <div>
+            <h2 className="text-xl font-semibold">Recent Assets</h2>
+            <p className="text-sm text-muted-foreground">
+              Recently added or modified assets
+            </p>
+          </div>
+          {assets.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={onViewAllAssets}>
+              View All
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          )}
         </div>
 
         {assets.length === 0 ? (
@@ -147,49 +280,6 @@ export function Dashboard({
           </Card>
         )}
       </div>
-
-      {/* Annual Summary */}
-      {annualSummary.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Annual Depreciation Summary</h2>
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Year</TableHead>
-                    <TableHead>Total Depreciation</TableHead>
-                    <TableHead>Assets</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {annualSummary.slice(0, 5).map((row) => (
-                    <TableRow
-                      key={row.year}
-                      className={
-                        row.year === currentYear
-                          ? "bg-primary/5"
-                          : ""
-                      }
-                    >
-                      <TableCell className="font-medium">
-                        {row.year}
-                        {row.year === currentYear && (
-                          <Badge variant="default" className="ml-2">
-                            Current
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{formatCurrency(row.total_depreciation)}</TableCell>
-                      <TableCell>{row.asset_count}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

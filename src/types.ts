@@ -61,3 +61,15 @@ export interface ImportResult {
   imported: number;
   errors: string[];
 }
+
+export interface AssetFilters {
+  search: string;
+  category: string | null;
+  status: "all" | "active" | "disposed";
+}
+
+export const defaultAssetFilters: AssetFilters = {
+  search: "",
+  category: null,
+  status: "all",
+};

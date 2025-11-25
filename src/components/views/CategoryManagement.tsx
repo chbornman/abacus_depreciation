@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { FieldError } from "@/components/ui/field-error";
 import {
   Select,
   SelectContent,
@@ -22,17 +23,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { validateCategory } from "@/lib/validation";
 import { CategoryWithCount, Category } from "@/types";
 
 const propertyClasses = [
-  { value: "3-year", label: "3-year" },
-  { value: "5-year", label: "5-year" },
-  { value: "7-year", label: "7-year" },
-  { value: "10-year", label: "10-year" },
-  { value: "15-year", label: "15-year" },
-  { value: "20-year", label: "20-year" },
-  { value: "27.5-year", label: "27.5-year" },
-  { value: "39-year", label: "39-year" },
+  { value: "3", label: "3-year" },
+  { value: "5", label: "5-year" },
+  { value: "7", label: "7-year" },
+  { value: "10", label: "10-year" },
+  { value: "15", label: "15-year" },
+  { value: "20", label: "20-year" },
+  { value: "27.5", label: "27.5-year" },
+  { value: "39", label: "39-year" },
 ];
 
 interface CategoryManagementProps {
@@ -56,6 +58,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
     default_useful_life: undefined,
     default_property_class: "",
   });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   // Delete confirmation state
@@ -89,6 +92,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
       default_useful_life: undefined,
       default_property_class: "",
     });
+    setFormErrors({});
     setDialogOpen(true);
   };
 
@@ -99,6 +103,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
       default_useful_life: category.default_useful_life,
       default_property_class: category.default_property_class ?? "",
     });
+    setFormErrors({});
     setDialogOpen(true);
   };
 
@@ -110,21 +115,26 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
   };
 
   const handleSave = async () => {
-    if (!formData.name.trim()) return;
+    const category: Category = {
+      id: editingCategory?.id,
+      name: formData.name.trim(),
+      default_useful_life: formData.default_useful_life,
+      default_property_class: formData.default_property_class.trim() || undefined,
+    };
+
+    const result = validateCategory(category);
+    if (!result.success) {
+      setFormErrors(result.errors);
+      return;
+    }
 
     setSaving(true);
+    setFormErrors({});
     try {
-      const category: Category = {
-        id: editingCategory?.id,
-        name: formData.name.trim(),
-        default_useful_life: formData.default_useful_life,
-        default_property_class: formData.default_property_class.trim() || undefined,
-      };
-
       if (editingCategory) {
-        await invoke("update_category", { category });
+        await invoke("update_category", { category: result.data });
       } else {
-        await invoke("create_category", { category });
+        await invoke("create_category", { category: result.data });
       }
 
       setDialogOpen(false);
@@ -176,6 +186,23 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
       setDeleting(false);
     }
   };
+
+  const handleFieldChange = <K extends keyof typeof formData>(
+    field: K,
+    value: (typeof formData)[K]
+  ) => {
+    if (formErrors[field]) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const inputErrorClass = (field: string) =>
+    formErrors[field] ? "border-destructive focus-visible:ring-destructive" : "";
 
   return (
     <Card>
@@ -276,13 +303,17 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">
+                  Name <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => handleFieldChange("name", e.target.value)}
                   placeholder="e.g., Office Equipment"
+                  className={inputErrorClass("name")}
                 />
+                <FieldError error={formErrors.name} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="useful_life">Default Useful Life (Years)</Label>
@@ -292,9 +323,11 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
                   min={1}
                   allowEmpty
                   value={formData.default_useful_life ?? ""}
-                  onChange={(value) => setFormData({ ...formData, default_useful_life: value })}
+                  onChange={(value) => handleFieldChange("default_useful_life", value)}
                   placeholder="e.g., 5"
+                  className={inputErrorClass("default_useful_life")}
                 />
+                <FieldError error={formErrors.default_useful_life} />
                 <p className="text-xs text-muted-foreground">
                   Suggested useful life for assets in this category
                 </p>
@@ -304,10 +337,10 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
                 <Select
                   value={formData.default_property_class || "none"}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, default_property_class: value === "none" ? "" : value })
+                    handleFieldChange("default_property_class", value === "none" ? "" : value)
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={inputErrorClass("default_property_class")}>
                     <SelectValue placeholder="Select property class" />
                   </SelectTrigger>
                   <SelectContent>
@@ -319,6 +352,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
                     ))}
                   </SelectContent>
                 </Select>
+                <FieldError error={formErrors.default_property_class} />
                 <p className="text-xs text-muted-foreground">
                   IRS property classification for depreciation
                 </p>
@@ -328,7 +362,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={!formData.name.trim() || saving}>
+              <Button onClick={handleSave} disabled={saving}>
                 {saving ? "Saving..." : editingCategory ? "Save Changes" : "Add Category"}
               </Button>
             </DialogFooter>

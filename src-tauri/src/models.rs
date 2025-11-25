@@ -6,6 +6,8 @@ pub struct Category {
     pub name: String,
     pub default_useful_life: Option<i32>,
     pub default_property_class: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -14,6 +16,8 @@ pub struct CategoryWithCount {
     pub name: String,
     pub default_useful_life: Option<i32>,
     pub default_property_class: Option<String>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
     pub asset_count: i64,
 }
 
@@ -31,6 +35,8 @@ pub struct Asset {
     pub notes: Option<String>,
     pub disposed_date: Option<String>,
     pub disposed_value: Option<f64>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

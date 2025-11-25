@@ -1,9 +1,11 @@
+import { useState, useEffect } from "react";
 import { Calculator, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FieldError } from "@/components/ui/field-error";
 import {
   Select,
   SelectContent,
@@ -21,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatCurrency } from "@/lib/utils";
+import { validateAsset } from "@/lib/validation";
 import type { Asset, Category } from "@/types";
 
 interface AssetFormDialogProps {
@@ -51,6 +54,13 @@ export function AssetFormDialog({
   onChange,
   onSubmit,
 }: AssetFormDialogProps) {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Clear errors when dialog opens/closes or asset changes
+  useEffect(() => {
+    setErrors({});
+  }, [open, asset?.id]);
+
   if (!asset) return null;
 
   const isEditing = !!asset.id;
@@ -61,8 +71,29 @@ export function AssetFormDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const result = validateAsset(asset);
+    if (!result.success) {
+      setErrors(result.errors);
+      return;
+    }
+    setErrors({});
     onSubmit();
   };
+
+  // Clear specific field error on change
+  const handleChange = <K extends keyof Asset>(field: K, value: Asset[K]) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+    onChange(field, value);
+  };
+
+  const inputErrorClass = (field: string) =>
+    errors[field] ? "border-destructive focus-visible:ring-destructive" : "";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -87,10 +118,11 @@ export function AssetFormDialog({
                 <Input
                   id="name"
                   value={asset.name}
-                  onChange={(e) => onChange("name", e.target.value)}
+                  onChange={(e) => handleChange("name", e.target.value)}
                   placeholder="Enter asset name"
-                  required
+                  className={inputErrorClass("name")}
                 />
+                <FieldError error={errors.name} />
               </div>
 
               <div className="space-y-2">
@@ -98,7 +130,7 @@ export function AssetFormDialog({
                 <Select
                   value={asset.category_id?.toString() || "none"}
                   onValueChange={(value) =>
-                    onChange("category_id", value === "none" ? undefined : Number(value))
+                    handleChange("category_id", value === "none" ? undefined : Number(value))
                   }
                 >
                   <SelectTrigger>
@@ -122,9 +154,11 @@ export function AssetFormDialog({
                 <DatePicker
                   id="date"
                   value={asset.date_placed_in_service}
-                  onChange={(value) => onChange("date_placed_in_service", value)}
+                  onChange={(value) => handleChange("date_placed_in_service", value)}
                   placeholder="Select date"
+                  className={inputErrorClass("date_placed_in_service")}
                 />
+                <FieldError error={errors.date_placed_in_service} />
               </div>
 
               <div className="space-y-2">
@@ -132,10 +166,10 @@ export function AssetFormDialog({
                 <Select
                   value={asset.property_class || "none"}
                   onValueChange={(value) =>
-                    onChange("property_class", value === "none" ? undefined : value)
+                    handleChange("property_class", value === "none" ? undefined : value)
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={inputErrorClass("property_class")}>
                     <SelectValue placeholder="Select class" />
                   </SelectTrigger>
                   <SelectContent>
@@ -147,6 +181,7 @@ export function AssetFormDialog({
                     ))}
                   </SelectContent>
                 </Select>
+                <FieldError error={errors.property_class} />
               </div>
             </div>
 
@@ -161,8 +196,10 @@ export function AssetFormDialog({
                   step={0.01}
                   min={0}
                   value={asset.cost}
-                  onChange={(value) => onChange("cost", value ?? 0)}
+                  onChange={(value) => handleChange("cost", value ?? 0)}
+                  className={inputErrorClass("cost")}
                 />
+                <FieldError error={errors.cost} />
               </div>
 
               <div className="space-y-2">
@@ -172,8 +209,10 @@ export function AssetFormDialog({
                   step={0.01}
                   min={0}
                   value={asset.salvage_value}
-                  onChange={(value) => onChange("salvage_value", value ?? 0)}
+                  onChange={(value) => handleChange("salvage_value", value ?? 0)}
+                  className={inputErrorClass("salvage_value")}
                 />
+                <FieldError error={errors.salvage_value} />
               </div>
 
               <div className="space-y-2">
@@ -185,8 +224,10 @@ export function AssetFormDialog({
                   step={1}
                   min={1}
                   value={asset.useful_life_years}
-                  onChange={(value) => onChange("useful_life_years", value ?? 1)}
+                  onChange={(value) => handleChange("useful_life_years", value ?? 1)}
+                  className={inputErrorClass("useful_life_years")}
                 />
+                <FieldError error={errors.useful_life_years} />
               </div>
             </div>
 
@@ -198,10 +239,10 @@ export function AssetFormDialog({
                   value={asset.disposed_date ? "disposed" : "active"}
                   onValueChange={(value) => {
                     if (value === "active") {
-                      onChange("disposed_date", undefined);
-                      onChange("disposed_value", undefined);
+                      handleChange("disposed_date", undefined);
+                      handleChange("disposed_value", undefined);
                     } else {
-                      onChange("disposed_date", new Date().toISOString().split("T")[0]);
+                      handleChange("disposed_date", new Date().toISOString().split("T")[0]);
                     }
                   }}
                 >
@@ -229,9 +270,11 @@ export function AssetFormDialog({
                       <DatePicker
                         id="disposed_date"
                         value={asset.disposed_date}
-                        onChange={(value) => onChange("disposed_date", value)}
+                        onChange={(value) => handleChange("disposed_date", value)}
                         placeholder="Select date"
+                        className={inputErrorClass("disposed_date")}
                       />
+                      <FieldError error={errors.disposed_date} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="disposed_value">Sale/Disposal Value</Label>
@@ -241,9 +284,11 @@ export function AssetFormDialog({
                         min={0}
                         allowEmpty
                         value={asset.disposed_value ?? ""}
-                        onChange={(value) => onChange("disposed_value", value)}
+                        onChange={(value) => handleChange("disposed_value", value)}
                         placeholder="0.00"
+                        className={inputErrorClass("disposed_value")}
                       />
+                      <FieldError error={errors.disposed_value} />
                       <p className="text-xs text-muted-foreground">
                         Leave blank if scrapped with no value
                       </p>
@@ -260,9 +305,11 @@ export function AssetFormDialog({
                 <Input
                   id="description"
                   value={asset.description || ""}
-                  onChange={(e) => onChange("description", e.target.value || undefined)}
+                  onChange={(e) => handleChange("description", e.target.value || undefined)}
                   placeholder="Brief description of the asset"
+                  className={inputErrorClass("description")}
                 />
+                <FieldError error={errors.description} />
               </div>
 
               <div className="space-y-2">
@@ -270,10 +317,12 @@ export function AssetFormDialog({
                 <Textarea
                   id="notes"
                   value={asset.notes || ""}
-                  onChange={(e) => onChange("notes", e.target.value || undefined)}
+                  onChange={(e) => handleChange("notes", e.target.value || undefined)}
                   placeholder="Additional notes..."
                   rows={3}
+                  className={inputErrorClass("notes")}
                 />
+                <FieldError error={errors.notes} />
               </div>
             </div>
 
@@ -301,7 +350,7 @@ export function AssetFormDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!asset.name.trim()}>
+            <Button type="submit">
               {isEditing ? "Save Changes" : "Add Asset"}
             </Button>
           </DialogFooter>

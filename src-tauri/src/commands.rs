@@ -1,6 +1,7 @@
 use crate::db::Database;
 use crate::depreciation::{current_book_value, depreciation_for_year, generate_schedule};
 use crate::models::*;
+use crate::validation;
 use chrono::Datelike;
 use rusqlite::params;
 use tauri::State;
@@ -105,10 +106,13 @@ pub fn get_categories(db: State<Database>) -> Result<Vec<Category>> {
 
 #[tauri::command]
 pub fn create_category(db: State<Database>, category: Category) -> Result<i64> {
+    // Validate before inserting
+    validation::validate_category(&category).map_err(map_err)?;
+
     let conn = db.conn.lock().map_err(map_err)?;
     conn.execute(
         "INSERT INTO categories (name, default_useful_life, default_property_class) VALUES (?1, ?2, ?3)",
-        params![category.name, category.default_useful_life, category.default_property_class],
+        params![category.name.trim(), category.default_useful_life, category.default_property_class],
     )
     .map_err(map_err)?;
 
@@ -117,12 +121,15 @@ pub fn create_category(db: State<Database>, category: Category) -> Result<i64> {
 
 #[tauri::command]
 pub fn update_category(db: State<Database>, category: Category) -> Result<()> {
+    // Validate before updating
+    validation::validate_category(&category).map_err(map_err)?;
+
     let conn = db.conn.lock().map_err(map_err)?;
     let id = category.id.ok_or("Category ID required")?;
 
     conn.execute(
         "UPDATE categories SET name = ?1, default_useful_life = ?2, default_property_class = ?3 WHERE id = ?4",
-        params![category.name, category.default_useful_life, category.default_property_class, id],
+        params![category.name.trim(), category.default_useful_life, category.default_property_class, id],
     )
     .map_err(map_err)?;
 
@@ -317,21 +324,24 @@ pub fn get_asset(db: State<Database>, id: i64) -> Result<AssetWithSchedule> {
 
 #[tauri::command]
 pub fn create_asset(db: State<Database>, asset: Asset) -> Result<i64> {
+    // Validate before inserting
+    validation::validate_asset(&asset).map_err(map_err)?;
+
     let conn = db.conn.lock().map_err(map_err)?;
 
     conn.execute(
         "INSERT INTO assets (name, description, category_id, date_placed_in_service, cost, salvage_value, useful_life_years, property_class, notes)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
         params![
-            asset.name,
-            asset.description,
+            asset.name.trim(),
+            asset.description.as_ref().map(|s| s.trim()),
             asset.category_id,
-            asset.date_placed_in_service,
+            asset.date_placed_in_service.trim(),
             asset.cost,
             asset.salvage_value,
             asset.useful_life_years,
             asset.property_class,
-            asset.notes,
+            asset.notes.as_ref().map(|s| s.trim()),
         ],
     )
     .map_err(map_err)?;
@@ -348,6 +358,9 @@ pub fn create_asset(db: State<Database>, asset: Asset) -> Result<i64> {
 
 #[tauri::command]
 pub fn update_asset(db: State<Database>, asset: Asset) -> Result<()> {
+    // Validate before updating
+    validation::validate_asset(&asset).map_err(map_err)?;
+
     let conn = db.conn.lock().map_err(map_err)?;
     let id = asset.id.ok_or("Asset ID required")?;
 
@@ -358,15 +371,15 @@ pub fn update_asset(db: State<Database>, asset: Asset) -> Result<()> {
             notes = ?9, disposed_date = ?10, disposed_value = ?11, updated_at = CURRENT_TIMESTAMP
          WHERE id = ?12",
         params![
-            asset.name,
-            asset.description,
+            asset.name.trim(),
+            asset.description.as_ref().map(|s| s.trim()),
             asset.category_id,
-            asset.date_placed_in_service,
+            asset.date_placed_in_service.trim(),
             asset.cost,
             asset.salvage_value,
             asset.useful_life_years,
             asset.property_class,
-            asset.notes,
+            asset.notes.as_ref().map(|s| s.trim()),
             asset.disposed_date,
             asset.disposed_value,
             id,
@@ -398,6 +411,20 @@ pub fn dispose_asset(
     disposed_value: Option<f64>,
 ) -> Result<()> {
     let conn = db.conn.lock().map_err(map_err)?;
+
+    // Get the asset's date_placed_in_service for validation
+    let date_placed_in_service: String = conn
+        .query_row(
+            "SELECT date_placed_in_service FROM assets WHERE id = ?1",
+            [id],
+            |row| row.get(0),
+        )
+        .map_err(|_| "Asset not found")?;
+
+    // Validate the disposal
+    validation::validate_disposal(&disposed_date, disposed_value, &date_placed_in_service)
+        .map_err(map_err)?;
+
     conn.execute(
         "UPDATE assets SET disposed_date = ?1, disposed_value = ?2, updated_at = CURRENT_TIMESTAMP WHERE id = ?3",
         params![disposed_date, disposed_value, id],

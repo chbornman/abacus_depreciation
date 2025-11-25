@@ -21,7 +21,9 @@ import type {
   DashboardStats,
   ImportResult,
   AnnualSummary,
+  AssetFilters,
 } from "@/types";
+import { defaultAssetFilters } from "@/types";
 
 import "@/index.css";
 
@@ -46,6 +48,7 @@ function App() {
   const [assetFormOpen, setAssetFormOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [assetFilters, setAssetFilters] = useState<AssetFilters>(defaultAssetFilters);
 
   // UI Scale state - load from localStorage
   const [scale, setScale] = useState<number>(() => {
@@ -267,6 +270,15 @@ function App() {
     setTheme(newTheme);
   }, []);
 
+  const handleFilterByCategory = useCallback((categoryName: string) => {
+    setAssetFilters({ ...defaultAssetFilters, category: categoryName });
+    setView("assets");
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setAssetFilters(defaultAssetFilters);
+  }, []);
+
   const renderView = () => {
     switch (view) {
       case "dashboard":
@@ -278,6 +290,7 @@ function App() {
             currentYear={currentYear}
             onViewAsset={handleViewAsset}
             onViewAllAssets={() => navigateTo("assets")}
+            onFilterByCategory={handleFilterByCategory}
           />
         );
       case "assets":
@@ -285,6 +298,9 @@ function App() {
           <AssetList
             assets={assets}
             currentYear={currentYear}
+            filters={assetFilters}
+            onFiltersChange={setAssetFilters}
+            onResetFilters={handleResetFilters}
             onViewAsset={handleViewAsset}
             onAddAsset={handleAddAsset}
           />
