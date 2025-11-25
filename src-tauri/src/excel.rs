@@ -25,9 +25,7 @@ pub fn import_assets_from_excel(db: State<Database>, file_path: String) -> Resul
         .cloned()
         .ok_or("No sheets found")?;
 
-    let range = workbook
-        .worksheet_range(&sheet_name)
-        .map_err(map_err)?;
+    let range = workbook.worksheet_range(&sheet_name).map_err(map_err)?;
 
     let mut imported = 0;
     let mut errors = Vec::new();
@@ -40,12 +38,10 @@ pub fn import_assets_from_excel(db: State<Database>, file_path: String) -> Resul
 
         let result = parse_asset_row(row, row_idx + 1);
         match result {
-            Ok(asset_import) => {
-                match insert_imported_asset(&db, asset_import) {
-                    Ok(_) => imported += 1,
-                    Err(e) => errors.push(format!("Row {}: {}", row_idx + 1, e)),
-                }
-            }
+            Ok(asset_import) => match insert_imported_asset(&db, asset_import) {
+                Ok(_) => imported += 1,
+                Err(e) => errors.push(format!("Row {}: {}", row_idx + 1, e)),
+            },
             Err(e) => errors.push(format!("Row {}: {}", row_idx + 1, e)),
         }
     }
@@ -102,10 +98,12 @@ fn parse_asset_row(row: &[calamine::Data], _row_num: usize) -> Result<AssetImpor
             if s.contains('/') {
                 let parts: Vec<&str> = s.split('/').collect();
                 if parts.len() == 3 {
-                    format!("{}-{:02}-{:02}",
+                    format!(
+                        "{}-{:02}-{:02}",
                         parts[2].parse::<i32>().unwrap_or(2024),
                         parts[0].parse::<i32>().unwrap_or(1),
-                        parts[1].parse::<i32>().unwrap_or(1))
+                        parts[1].parse::<i32>().unwrap_or(1)
+                    )
                 } else {
                     s.clone()
                 }
@@ -151,11 +149,8 @@ fn insert_imported_asset(db: &State<Database>, import: AssetImport) -> Result<i6
         if let Some(id) = existing {
             Some(id)
         } else {
-            conn.execute(
-                "INSERT INTO categories (name) VALUES (?1)",
-                [cat_name],
-            )
-            .map_err(map_err)?;
+            conn.execute("INSERT INTO categories (name) VALUES (?1)", [cat_name])
+                .map_err(map_err)?;
             Some(conn.last_insert_rowid())
         }
     } else {
@@ -244,15 +239,23 @@ pub fn export_template(file_path: String) -> Result<()> {
     }
 
     // Example row
-    worksheet.write_string(1, 0, "Example Computer").map_err(map_err)?;
-    worksheet.write_string(1, 1, "Office workstation").map_err(map_err)?;
+    worksheet
+        .write_string(1, 0, "Example Computer")
+        .map_err(map_err)?;
+    worksheet
+        .write_string(1, 1, "Office workstation")
+        .map_err(map_err)?;
     worksheet.write_string(1, 2, "Equipment").map_err(map_err)?;
-    worksheet.write_string(1, 3, "2024-01-15").map_err(map_err)?;
+    worksheet
+        .write_string(1, 3, "2024-01-15")
+        .map_err(map_err)?;
     worksheet.write_number(1, 4, 2000.0).map_err(map_err)?;
     worksheet.write_number(1, 5, 200.0).map_err(map_err)?;
     worksheet.write_number(1, 6, 5.0).map_err(map_err)?;
     worksheet.write_string(1, 7, "5").map_err(map_err)?;
-    worksheet.write_string(1, 8, "Main office").map_err(map_err)?;
+    worksheet
+        .write_string(1, 8, "Main office")
+        .map_err(map_err)?;
 
     // Set column widths
     worksheet.set_column_width(0, 20).map_err(map_err)?;
@@ -283,48 +286,81 @@ pub fn export_depreciation_report(db: State<Database>, file_path: String) -> Res
         let worksheet = workbook.add_worksheet();
         worksheet.set_name("Assets").map_err(map_err)?;
 
-        let headers = ["Asset Name", "Category", "Cost", "Salvage Value", "Life (Yrs)", "Service Date", "Current Book Value", "Status"];
+        let headers = [
+            "Asset Name",
+            "Category",
+            "Cost",
+            "Salvage Value",
+            "Life (Yrs)",
+            "Service Date",
+            "Current Book Value",
+            "Status",
+        ];
         for (col, header) in headers.iter().enumerate() {
-            worksheet.write_string_with_format(0, col as u16, *header, &header_format).map_err(map_err)?;
+            worksheet
+                .write_string_with_format(0, col as u16, *header, &header_format)
+                .map_err(map_err)?;
         }
 
         let mut stmt = conn.prepare(
             "SELECT a.*, c.name as category_name FROM assets a LEFT JOIN categories c ON a.category_id = c.id ORDER BY a.name"
         ).map_err(map_err)?;
 
-        let assets: Vec<(Asset, Option<String>)> = stmt.query_map([], |row| {
-            Ok((
-                Asset {
-                    id: row.get(0)?,
-                    name: row.get(1)?,
-                    description: row.get(2)?,
-                    category_id: row.get(3)?,
-                    date_placed_in_service: row.get(4)?,
-                    cost: row.get(5)?,
-                    salvage_value: row.get(6)?,
-                    useful_life_years: row.get(7)?,
-                    property_class: row.get(8)?,
-                    notes: row.get(9)?,
-                    disposed_date: row.get(10)?,
-                    disposed_value: row.get(11)?,
-                },
-                row.get(14)?,
-            ))
-        }).map_err(map_err)?.filter_map(|r| r.ok()).collect();
+        let assets: Vec<(Asset, Option<String>)> = stmt
+            .query_map([], |row| {
+                Ok((
+                    Asset {
+                        id: row.get(0)?,
+                        name: row.get(1)?,
+                        description: row.get(2)?,
+                        category_id: row.get(3)?,
+                        date_placed_in_service: row.get(4)?,
+                        cost: row.get(5)?,
+                        salvage_value: row.get(6)?,
+                        useful_life_years: row.get(7)?,
+                        property_class: row.get(8)?,
+                        notes: row.get(9)?,
+                        disposed_date: row.get(10)?,
+                        disposed_value: row.get(11)?,
+                    },
+                    row.get(14)?,
+                ))
+            })
+            .map_err(map_err)?
+            .filter_map(|r| r.ok())
+            .collect();
 
         for (row_idx, (asset, cat_name)) in assets.iter().enumerate() {
             let row = (row_idx + 1) as u32;
-            worksheet.write_string(row, 0, &asset.name).map_err(map_err)?;
-            worksheet.write_string(row, 1, cat_name.as_deref().unwrap_or("")).map_err(map_err)?;
-            worksheet.write_number_with_format(row, 2, asset.cost, &money_format).map_err(map_err)?;
-            worksheet.write_number_with_format(row, 3, asset.salvage_value, &money_format).map_err(map_err)?;
-            worksheet.write_number(row, 4, asset.useful_life_years as f64).map_err(map_err)?;
-            worksheet.write_string(row, 5, &asset.date_placed_in_service).map_err(map_err)?;
+            worksheet
+                .write_string(row, 0, &asset.name)
+                .map_err(map_err)?;
+            worksheet
+                .write_string(row, 1, cat_name.as_deref().unwrap_or(""))
+                .map_err(map_err)?;
+            worksheet
+                .write_number_with_format(row, 2, asset.cost, &money_format)
+                .map_err(map_err)?;
+            worksheet
+                .write_number_with_format(row, 3, asset.salvage_value, &money_format)
+                .map_err(map_err)?;
+            worksheet
+                .write_number(row, 4, asset.useful_life_years as f64)
+                .map_err(map_err)?;
+            worksheet
+                .write_string(row, 5, &asset.date_placed_in_service)
+                .map_err(map_err)?;
 
             let book_value = crate::depreciation::current_book_value(asset, current_year);
-            worksheet.write_number_with_format(row, 6, book_value, &money_format).map_err(map_err)?;
+            worksheet
+                .write_number_with_format(row, 6, book_value, &money_format)
+                .map_err(map_err)?;
 
-            let status = if asset.disposed_date.is_some() { "Disposed" } else { "Active" };
+            let status = if asset.disposed_date.is_some() {
+                "Disposed"
+            } else {
+                "Active"
+            };
             worksheet.write_string(row, 7, status).map_err(map_err)?;
         }
 
@@ -336,11 +372,22 @@ pub fn export_depreciation_report(db: State<Database>, file_path: String) -> Res
     // Sheet 2: Depreciation Schedule
     {
         let worksheet = workbook.add_worksheet();
-        worksheet.set_name("Depreciation Schedule").map_err(map_err)?;
+        worksheet
+            .set_name("Depreciation Schedule")
+            .map_err(map_err)?;
 
-        let headers = ["Asset Name", "Year", "Beginning Value", "Depreciation", "Accumulated", "Ending Value"];
+        let headers = [
+            "Asset Name",
+            "Year",
+            "Beginning Value",
+            "Depreciation",
+            "Accumulated",
+            "Ending Value",
+        ];
         for (col, header) in headers.iter().enumerate() {
-            worksheet.write_string_with_format(0, col as u16, *header, &header_format).map_err(map_err)?;
+            worksheet
+                .write_string_with_format(0, col as u16, *header, &header_format)
+                .map_err(map_err)?;
         }
 
         let mut stmt = conn.prepare(
@@ -350,18 +397,39 @@ pub fn export_depreciation_report(db: State<Database>, file_path: String) -> Res
              ORDER BY a.name, ds.year"
         ).map_err(map_err)?;
 
-        let rows: Vec<(String, i32, f64, f64, f64, f64)> = stmt.query_map([], |row| {
-            Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?, row.get(4)?, row.get(5)?))
-        }).map_err(map_err)?.filter_map(|r| r.ok()).collect();
+        let rows: Vec<(String, i32, f64, f64, f64, f64)> = stmt
+            .query_map([], |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                ))
+            })
+            .map_err(map_err)?
+            .filter_map(|r| r.ok())
+            .collect();
 
         for (row_idx, (name, year, begin, expense, accum, end)) in rows.iter().enumerate() {
             let row = (row_idx + 1) as u32;
             worksheet.write_string(row, 0, name).map_err(map_err)?;
-            worksheet.write_number(row, 1, *year as f64).map_err(map_err)?;
-            worksheet.write_number_with_format(row, 2, *begin, &money_format).map_err(map_err)?;
-            worksheet.write_number_with_format(row, 3, *expense, &money_format).map_err(map_err)?;
-            worksheet.write_number_with_format(row, 4, *accum, &money_format).map_err(map_err)?;
-            worksheet.write_number_with_format(row, 5, *end, &money_format).map_err(map_err)?;
+            worksheet
+                .write_number(row, 1, *year as f64)
+                .map_err(map_err)?;
+            worksheet
+                .write_number_with_format(row, 2, *begin, &money_format)
+                .map_err(map_err)?;
+            worksheet
+                .write_number_with_format(row, 3, *expense, &money_format)
+                .map_err(map_err)?;
+            worksheet
+                .write_number_with_format(row, 4, *accum, &money_format)
+                .map_err(map_err)?;
+            worksheet
+                .write_number_with_format(row, 5, *end, &money_format)
+                .map_err(map_err)?;
         }
 
         worksheet.set_column_width(0, 25).map_err(map_err)?;
@@ -374,25 +442,37 @@ pub fn export_depreciation_report(db: State<Database>, file_path: String) -> Res
 
         let headers = ["Year", "Total Depreciation", "Asset Count"];
         for (col, header) in headers.iter().enumerate() {
-            worksheet.write_string_with_format(0, col as u16, *header, &header_format).map_err(map_err)?;
+            worksheet
+                .write_string_with_format(0, col as u16, *header, &header_format)
+                .map_err(map_err)?;
         }
 
-        let mut stmt = conn.prepare(
-            "SELECT year, SUM(depreciation_expense), COUNT(DISTINCT asset_id)
+        let mut stmt = conn
+            .prepare(
+                "SELECT year, SUM(depreciation_expense), COUNT(DISTINCT asset_id)
              FROM depreciation_schedule
              GROUP BY year
-             ORDER BY year"
-        ).map_err(map_err)?;
+             ORDER BY year",
+            )
+            .map_err(map_err)?;
 
-        let rows: Vec<(i32, f64, i64)> = stmt.query_map([], |row| {
-            Ok((row.get(0)?, row.get(1)?, row.get(2)?))
-        }).map_err(map_err)?.filter_map(|r| r.ok()).collect();
+        let rows: Vec<(i32, f64, i64)> = stmt
+            .query_map([], |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))
+            .map_err(map_err)?
+            .filter_map(|r| r.ok())
+            .collect();
 
         for (row_idx, (year, total, count)) in rows.iter().enumerate() {
             let row = (row_idx + 1) as u32;
-            worksheet.write_number(row, 0, *year as f64).map_err(map_err)?;
-            worksheet.write_number_with_format(row, 1, *total, &money_format).map_err(map_err)?;
-            worksheet.write_number(row, 2, *count as f64).map_err(map_err)?;
+            worksheet
+                .write_number(row, 0, *year as f64)
+                .map_err(map_err)?;
+            worksheet
+                .write_number_with_format(row, 1, *total, &money_format)
+                .map_err(map_err)?;
+            worksheet
+                .write_number(row, 2, *count as f64)
+                .map_err(map_err)?;
         }
     }
 

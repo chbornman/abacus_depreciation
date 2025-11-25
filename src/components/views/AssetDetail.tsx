@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ChevronRight, Pencil, Trash2, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +19,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
+import { DisposeDialog } from "@/components/DisposeDialog";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { AssetWithSchedule } from "@/types";
 
@@ -28,7 +30,7 @@ interface AssetDetailProps {
   currentYear: number;
   onEdit: () => void;
   onDelete: () => void;
-  onDispose: () => void;
+  onDispose: (disposedDate: string, disposedValue: number | null) => void;
   onBack: () => void;
 }
 
@@ -40,6 +42,9 @@ export function AssetDetail({
   onDispose,
   onBack,
 }: AssetDetailProps) {
+  const [showDisposeDialog, setShowDisposeDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const { asset: assetData, schedule, category_name } = asset;
 
   const detailItems = [
@@ -50,6 +55,16 @@ export function AssetDetail({
     { label: "Useful Life", value: `${assetData.useful_life_years} years` },
     { label: "Property Class", value: assetData.property_class || "—" },
   ];
+
+  const handleDisposeConfirm = (disposedDate: string, disposedValue: number | null) => {
+    onDispose(disposedDate, disposedValue);
+    setShowDisposeDialog(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    onDelete();
+    setShowDeleteDialog(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -68,10 +83,34 @@ export function AssetDetail({
             <Badge variant="destructive" className="ml-2">Disposed</Badge>
           )}
         </div>
-        <Button variant="outline" onClick={onEdit} className="gap-2">
-          <Pencil className="h-4 w-4" />
-          Edit
-        </Button>
+
+        {/* All Action Buttons */}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={onEdit} className="gap-2">
+            <Pencil className="h-4 w-4" />
+            Edit
+          </Button>
+
+          {!assetData.disposed_date && (
+            <Button
+              variant="outline"
+              onClick={() => setShowDisposeDialog(true)}
+              className="gap-2"
+            >
+              <AlertTriangle className="h-4 w-4" />
+              Mark Disposed
+            </Button>
+          )}
+
+          <Button
+            variant="destructive"
+            className="gap-2"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </Button>
+        </div>
       </div>
 
       {/* Asset Details Grid */}
@@ -118,24 +157,65 @@ export function AssetDetail({
           {assetData.disposed_date && (
             <>
               <Separator className="my-6" />
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-1">
-                  <div className="text-sm text-[hsl(var(--muted-foreground))]">
-                    Disposed Date
+              {(() => {
+                // Calculate book value at disposal and gain/loss
+                const disposalYear = new Date(assetData.disposed_date).getFullYear();
+                const scheduleAtDisposal = schedule.find(s => s.year === disposalYear);
+                const lastScheduleEntry = schedule[schedule.length - 1];
+
+                // Use the beginning book value of disposal year (value before that year's depreciation)
+                // or ending value of last schedule year if disposed after schedule ends
+                const bookValueAtDisposal = scheduleAtDisposal
+                  ? scheduleAtDisposal.beginning_book_value
+                  : lastScheduleEntry?.ending_book_value ?? assetData.salvage_value;
+
+                const disposedValue = assetData.disposed_value ?? 0;
+                const gainLoss = disposedValue - bookValueAtDisposal;
+                const hasGainLoss = assetData.disposed_value != null;
+
+                return (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <div className="space-y-1">
+                      <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                        Disposed Date
+                      </div>
+                      <div className="font-medium">{formatDate(assetData.disposed_date)}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                        Book Value at Disposal
+                      </div>
+                      <div className="font-medium font-mono">
+                        {formatCurrency(bookValueAtDisposal)}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                        Sale Price
+                      </div>
+                      <div className="font-medium font-mono">
+                        {assetData.disposed_value != null
+                          ? formatCurrency(assetData.disposed_value)
+                          : "—"}
+                      </div>
+                    </div>
+                    {hasGainLoss && (
+                      <div className="space-y-1">
+                        <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                          {gainLoss >= 0 ? "Gain on Sale" : "Loss on Sale"}
+                        </div>
+                        <div className={`font-medium font-mono ${
+                          gainLoss >= 0
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}>
+                          {gainLoss >= 0 ? "+" : ""}{formatCurrency(gainLoss)}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="font-medium">{formatDate(assetData.disposed_date)}</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-sm text-[hsl(var(--muted-foreground))]">
-                    Disposed Value
-                  </div>
-                  <div className="font-medium">
-                    {assetData.disposed_value
-                      ? formatCurrency(assetData.disposed_value)
-                      : "—"}
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
             </>
           )}
         </CardContent>
@@ -191,41 +271,44 @@ export function AssetDetail({
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <Card>
-        <CardContent className="flex items-center justify-end gap-3 pt-6">
-          {!assetData.disposed_date && (
-            <Button variant="outline" onClick={onDispose} className="gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Mark Disposed
-            </Button>
-          )}
+      {/* Dispose Dialog */}
+      <DisposeDialog
+        open={showDisposeDialog}
+        assetName={assetData.name}
+        onClose={() => setShowDisposeDialog(false)}
+        onConfirm={handleDisposeConfirm}
+      />
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="destructive" className="gap-2">
-                <Trash2 className="h-4 w-4" />
-                Delete Asset
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--destructive))]/10">
+                <Trash2 className="h-5 w-5 text-[hsl(var(--destructive))]" />
+              </div>
+              <div>
                 <DialogTitle>Delete Asset</DialogTitle>
                 <DialogDescription>
-                  Are you sure you want to delete "{assetData.name}"? This action cannot be
-                  undone and will remove all associated depreciation records.
+                  This action cannot be undone
                 </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button variant="outline">Cancel</Button>
-                <Button variant="destructive" onClick={onDelete}>
-                  Delete
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </CardContent>
-      </Card>
+              </div>
+            </div>
+          </DialogHeader>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+            Are you sure you want to delete "{assetData.name}"? This will permanently
+            remove the asset and all associated depreciation records.
+          </p>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              Delete Asset
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

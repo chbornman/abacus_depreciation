@@ -9,3 +9,4 @@ export * from "./separator";
 export * from "./textarea";
 export * from "./scroll-area";
 export * from "./dialog";
+export * from "./toast";

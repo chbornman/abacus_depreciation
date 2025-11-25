@@ -1,7 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import "./App.css";
+
+import { Sidebar } from "@/components/Sidebar";
+import { Toast } from "@/components/ui/toast";
+import {
+  Dashboard,
+  AssetList,
+  AssetDetail,
+  AssetForm,
+  Reports,
+  Settings,
+} from "@/components/views";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 import type {
   Asset,
   AssetWithSchedule,
@@ -9,9 +21,16 @@ import type {
   DashboardStats,
   ImportResult,
   AnnualSummary,
-} from "./types";
+} from "@/types";
 
-type View = "dashboard" | "assets" | "asset-detail" | "asset-form" | "reports";
+import "@/index.css";
+
+type View = "dashboard" | "assets" | "asset-detail" | "asset-form" | "reports" | "settings";
+
+const STORAGE_KEY_SCALE = "abacus-ui-scale";
+const MIN_SCALE = 0.75;
+const MAX_SCALE = 2;
+const SCALE_INCREMENT = 0.1;
 
 function App() {
   const [view, setView] = useState<View>("dashboard");
@@ -24,7 +43,41 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // UI Scale state - load from localStorage
+  const [scale, setScale] = useState<number>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY_SCALE);
+    return saved ? parseFloat(saved) : 1;
+  });
+
   const currentYear = new Date().getFullYear();
+
+  // Persist scale to localStorage and apply to document root
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_SCALE, scale.toString());
+    // Apply zoom to the root element for proper scaling
+    document.documentElement.style.setProperty('--app-scale', scale.toString());
+  }, [scale]);
+
+  // Keyboard shortcuts for zoom
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === "=" || e.key === "+") {
+          e.preventDefault();
+          setScale((prev) => Math.min(MAX_SCALE, Math.round((prev + SCALE_INCREMENT) * 100) / 100));
+        } else if (e.key === "-") {
+          e.preventDefault();
+          setScale((prev) => Math.max(MIN_SCALE, Math.round((prev - SCALE_INCREMENT) * 100) / 100));
+        } else if (e.key === "0") {
+          e.preventDefault();
+          setScale(1);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -115,10 +168,10 @@ function App() {
     }
   };
 
-  const handleDeleteAsset = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this asset?")) return;
+  const handleDeleteAsset = async () => {
+    if (!selectedAsset) return;
     try {
-      await invoke("delete_asset", { id });
+      await invoke("delete_asset", { id: selectedAsset.asset.id });
       setSuccess("Asset deleted");
       await loadData();
       setView("assets");
@@ -128,537 +181,31 @@ function App() {
     }
   };
 
-  const handleDisposeAsset = async (id: number) => {
-    const disposedDate = prompt("Enter disposal date (YYYY-MM-DD):", new Date().toISOString().split("T")[0]);
-    if (!disposedDate) return;
-    const disposedValueStr = prompt("Enter sale/disposal value (or leave blank):");
-    const disposedValue = disposedValueStr ? parseFloat(disposedValueStr) : null;
+  const handleDisposeAsset = async (disposedDate: string, disposedValue: number | null) => {
+    if (!selectedAsset) return;
 
     try {
-      await invoke("dispose_asset", { id, disposedDate, disposedValue });
+      await invoke("dispose_asset", {
+        id: selectedAsset.asset.id,
+        disposedDate,
+        disposedValue,
+      });
       setSuccess("Asset marked as disposed");
       await loadData();
-      const updated = await invoke<AssetWithSchedule>("get_asset", { id });
+      const updated = await invoke<AssetWithSchedule>("get_asset", {
+        id: selectedAsset.asset.id,
+      });
       setSelectedAsset(updated);
     } catch (e) {
       setError(String(e));
     }
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value);
-  };
-
-  const clearMessages = () => {
-    setError(null);
-    setSuccess(null);
-  };
-
-  const navigateTo = (newView: View) => {
+  const navigateTo = useCallback((newView: View) => {
     setView(newView);
     if (newView !== "asset-detail") setSelectedAsset(null);
     if (newView !== "asset-form") setEditingAsset(null);
-  };
-
-  // ============ Sidebar ============
-
-  const renderSidebar = () => (
-    <aside className="sidebar">
-      <div className="sidebar-header">
-        <h1>Abacus</h1>
-        <span className="subtitle">Depreciation Tracker</span>
-      </div>
-
-      <nav className="sidebar-nav">
-        <button
-          className={`nav-item ${view === "dashboard" ? "active" : ""}`}
-          onClick={() => navigateTo("dashboard")}
-        >
-          <span className="nav-icon">&#9632;</span>
-          Dashboard
-        </button>
-        <button
-          className={`nav-item ${view === "assets" || view === "asset-detail" || view === "asset-form" ? "active" : ""}`}
-          onClick={() => navigateTo("assets")}
-        >
-          <span className="nav-icon">&#9776;</span>
-          Assets
-        </button>
-        <button
-          className={`nav-item ${view === "reports" ? "active" : ""}`}
-          onClick={() => navigateTo("reports")}
-        >
-          <span className="nav-icon">&#9783;</span>
-          Reports
-        </button>
-      </nav>
-
-      <div className="sidebar-actions">
-        <button className="sidebar-btn" onClick={handleImport}>
-          Import Excel
-        </button>
-        <button className="sidebar-btn" onClick={handleExportTemplate}>
-          Download Template
-        </button>
-      </div>
-
-      <div className="sidebar-footer">
-        <button
-          className="add-asset-btn"
-          onClick={() => { setEditingAsset(newAsset()); setView("asset-form"); }}
-        >
-          + Add Asset
-        </button>
-      </div>
-    </aside>
-  );
-
-  // ============ Views ============
-
-  const renderDashboard = () => (
-    <div className="view-content">
-      <h2>Dashboard</h2>
-
-      {stats && (
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-value">{stats.total_assets}</div>
-            <div className="stat-label">Total Assets</div>
-          </div>
-          <div className="stat-card highlight">
-            <div className="stat-value">{formatCurrency(stats.current_year_depreciation)}</div>
-            <div className="stat-label">{currentYear} Depreciation</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{formatCurrency(stats.total_book_value)}</div>
-            <div className="stat-label">Total Book Value</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">{formatCurrency(stats.total_cost)}</div>
-            <div className="stat-label">Total Cost</div>
-          </div>
-        </div>
-      )}
-
-      <div className="section-header">
-        <h3>Recent Assets</h3>
-        <button className="link-btn" onClick={() => navigateTo("assets")}>View All</button>
-      </div>
-
-      {assets.length === 0 ? (
-        <div className="empty-state">
-          <p>No assets yet. Import from Excel or add one manually.</p>
-        </div>
-      ) : (
-        <div className="asset-list">
-          {assets.slice(0, 5).map((item) => (
-            <div
-              key={item.asset.id}
-              className="asset-row"
-              onClick={() => { setSelectedAsset(item); setView("asset-detail"); }}
-            >
-              <div className="asset-name">{item.asset.name}</div>
-              <div className="asset-meta">
-                {item.category_name && <span className="tag">{item.category_name}</span>}
-                {item.asset.disposed_date && <span className="tag disposed">Disposed</span>}
-              </div>
-              <div className="asset-values">
-                <span>{formatCurrency(item.asset.cost)}</span>
-                <span className="depr">
-                  {formatCurrency(
-                    item.schedule.find((s) => s.year === currentYear)?.depreciation_expense || 0
-                  )}/yr
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {annualSummary.length > 0 && (
-        <>
-          <div className="section-header">
-            <h3>Annual Depreciation Summary</h3>
-          </div>
-          <table className="summary-table">
-            <thead>
-              <tr>
-                <th>Year</th>
-                <th>Total Depreciation</th>
-                <th>Assets</th>
-              </tr>
-            </thead>
-            <tbody>
-              {annualSummary.slice(0, 5).map((row) => (
-                <tr key={row.year} className={row.year === currentYear ? "current" : ""}>
-                  <td>{row.year}</td>
-                  <td>{formatCurrency(row.total_depreciation)}</td>
-                  <td>{row.asset_count}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
-    </div>
-  );
-
-  const renderAssetList = () => (
-    <div className="view-content">
-      <div className="view-header">
-        <h2>Assets</h2>
-        <button className="primary" onClick={() => { setEditingAsset(newAsset()); setView("asset-form"); }}>
-          + Add Asset
-        </button>
-      </div>
-
-      {assets.length === 0 ? (
-        <div className="empty-state">
-          <p>No assets yet.</p>
-        </div>
-      ) : (
-        <table className="asset-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Cost</th>
-              <th>Book Value</th>
-              <th>{currentYear} Depr.</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assets.map((item) => {
-              const currentEntry = item.schedule.find((s) => s.year === currentYear);
-              const bookValue = currentEntry?.ending_book_value ?? item.asset.cost;
-              return (
-                <tr
-                  key={item.asset.id}
-                  onClick={() => { setSelectedAsset(item); setView("asset-detail"); }}
-                >
-                  <td>{item.asset.name}</td>
-                  <td>{item.category_name || "-"}</td>
-                  <td>{formatCurrency(item.asset.cost)}</td>
-                  <td>{formatCurrency(bookValue)}</td>
-                  <td>{formatCurrency(currentEntry?.depreciation_expense || 0)}</td>
-                  <td>
-                    {item.asset.disposed_date ? (
-                      <span className="tag disposed">Disposed</span>
-                    ) : (
-                      <span className="tag active">Active</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
-    </div>
-  );
-
-  const renderAssetDetail = () => {
-    if (!selectedAsset) return null;
-    const { asset, schedule, category_name } = selectedAsset;
-
-    return (
-      <div className="view-content">
-        <div className="view-header">
-          <div className="breadcrumb">
-            <button className="link-btn" onClick={() => navigateTo("assets")}>Assets</button>
-            <span>/</span>
-            <span>{asset.name}</span>
-          </div>
-          <button onClick={() => { setEditingAsset(asset); setView("asset-form"); }}>Edit</button>
-        </div>
-
-        <div className="detail-grid">
-          <div className="detail-item">
-            <label>Category</label>
-            <span>{category_name || "None"}</span>
-          </div>
-          <div className="detail-item">
-            <label>Date Placed in Service</label>
-            <span>{asset.date_placed_in_service}</span>
-          </div>
-          <div className="detail-item">
-            <label>Cost</label>
-            <span>{formatCurrency(asset.cost)}</span>
-          </div>
-          <div className="detail-item">
-            <label>Salvage Value</label>
-            <span>{formatCurrency(asset.salvage_value)}</span>
-          </div>
-          <div className="detail-item">
-            <label>Useful Life</label>
-            <span>{asset.useful_life_years} years</span>
-          </div>
-          <div className="detail-item">
-            <label>Property Class</label>
-            <span>{asset.property_class || "-"}</span>
-          </div>
-          {asset.description && (
-            <div className="detail-item full">
-              <label>Description</label>
-              <span>{asset.description}</span>
-            </div>
-          )}
-          {asset.notes && (
-            <div className="detail-item full">
-              <label>Notes</label>
-              <span>{asset.notes}</span>
-            </div>
-          )}
-          {asset.disposed_date && (
-            <>
-              <div className="detail-item">
-                <label>Disposed Date</label>
-                <span>{asset.disposed_date}</span>
-              </div>
-              <div className="detail-item">
-                <label>Disposed Value</label>
-                <span>{asset.disposed_value ? formatCurrency(asset.disposed_value) : "-"}</span>
-              </div>
-            </>
-          )}
-        </div>
-
-        <h3>Depreciation Schedule</h3>
-        <table className="schedule-table">
-          <thead>
-            <tr>
-              <th>Year</th>
-              <th>Beginning Value</th>
-              <th>Depreciation</th>
-              <th>Accumulated</th>
-              <th>Ending Value</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {schedule.map((entry) => (
-              <tr key={entry.year} className={entry.year === currentYear ? "current" : ""}>
-                <td>{entry.year}</td>
-                <td>{formatCurrency(entry.beginning_book_value)}</td>
-                <td>{formatCurrency(entry.depreciation_expense)}</td>
-                <td>{formatCurrency(entry.accumulated_depreciation)}</td>
-                <td>{formatCurrency(entry.ending_book_value)}</td>
-                <td>{entry.year === currentYear && <span className="current-marker">Current</span>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="action-buttons">
-          {!asset.disposed_date && (
-            <button className="warning" onClick={() => handleDisposeAsset(asset.id!)}>
-              Mark Disposed
-            </button>
-          )}
-          <button className="danger" onClick={() => handleDeleteAsset(asset.id!)}>
-            Delete Asset
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderAssetForm = () => {
-    if (!editingAsset) return null;
-    const isEditing = !!editingAsset.id;
-
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      handleSaveAsset(editingAsset);
-    };
-
-    const updateField = <K extends keyof Asset>(field: K, value: Asset[K]) => {
-      setEditingAsset({ ...editingAsset, [field]: value });
-    };
-
-    return (
-      <div className="view-content">
-        <div className="view-header">
-          <div className="breadcrumb">
-            <button className="link-btn" onClick={() => navigateTo("assets")}>Assets</button>
-            <span>/</span>
-            <span>{isEditing ? "Edit Asset" : "New Asset"}</span>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Asset Name *</label>
-              <input
-                type="text"
-                value={editingAsset.name}
-                onChange={(e) => updateField("name", e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Category</label>
-              <select
-                value={editingAsset.category_id || ""}
-                onChange={(e) => updateField("category_id", e.target.value ? Number(e.target.value) : undefined)}
-              >
-                <option value="">None</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Date Placed in Service *</label>
-              <input
-                type="date"
-                value={editingAsset.date_placed_in_service}
-                onChange={(e) => updateField("date_placed_in_service", e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Property Class</label>
-              <select
-                value={editingAsset.property_class || ""}
-                onChange={(e) => updateField("property_class", e.target.value || undefined)}
-              >
-                <option value="">Select...</option>
-                <option value="3">3-year</option>
-                <option value="5">5-year</option>
-                <option value="7">7-year</option>
-                <option value="10">10-year</option>
-                <option value="15">15-year</option>
-                <option value="20">20-year</option>
-                <option value="27.5">27.5-year</option>
-                <option value="39">39-year</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Cost *</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={editingAsset.cost}
-                onChange={(e) => updateField("cost", parseFloat(e.target.value) || 0)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Salvage Value</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={editingAsset.salvage_value}
-                onChange={(e) => updateField("salvage_value", parseFloat(e.target.value) || 0)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Useful Life (Years) *</label>
-              <input
-                type="number"
-                min="1"
-                value={editingAsset.useful_life_years}
-                onChange={(e) => updateField("useful_life_years", parseInt(e.target.value) || 1)}
-                required
-              />
-            </div>
-
-            <div className="form-group full">
-              <label>Description</label>
-              <input
-                type="text"
-                value={editingAsset.description || ""}
-                onChange={(e) => updateField("description", e.target.value || undefined)}
-              />
-            </div>
-
-            <div className="form-group full">
-              <label>Notes</label>
-              <textarea
-                value={editingAsset.notes || ""}
-                onChange={(e) => updateField("notes", e.target.value || undefined)}
-                rows={3}
-              />
-            </div>
-          </div>
-
-          {editingAsset.cost > 0 && editingAsset.useful_life_years > 0 && (
-            <div className="preview-box">
-              <strong>Annual Depreciation:</strong>{" "}
-              {formatCurrency((editingAsset.cost - editingAsset.salvage_value) / editingAsset.useful_life_years)}
-            </div>
-          )}
-
-          <div className="form-actions">
-            <button type="button" onClick={() => navigateTo("assets")}>Cancel</button>
-            <button type="submit" className="primary">
-              {isEditing ? "Save Changes" : "Create Asset"}
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  };
-
-  const renderReports = () => (
-    <div className="view-content">
-      <div className="view-header">
-        <h2>Reports</h2>
-        <button className="primary" onClick={handleExportReport}>Export to Excel</button>
-      </div>
-
-      <div className="report-cards">
-        <div className="report-card" onClick={handleExportReport}>
-          <h4>Depreciation Report</h4>
-          <p>Full report with asset list, schedules, and annual summaries</p>
-        </div>
-        <div className="report-card" onClick={handleExportTemplate}>
-          <h4>Import Template</h4>
-          <p>Download a blank Excel template for importing assets</p>
-        </div>
-      </div>
-
-      <h3>Annual Summary</h3>
-      {annualSummary.length === 0 ? (
-        <div className="empty-state">
-          <p>No depreciation data yet. Add some assets first.</p>
-        </div>
-      ) : (
-        <table className="summary-table">
-          <thead>
-            <tr>
-              <th>Year</th>
-              <th>Total Depreciation</th>
-              <th>Number of Assets</th>
-            </tr>
-          </thead>
-          <tbody>
-            {annualSummary.map((row) => (
-              <tr key={row.year} className={row.year === currentYear ? "current" : ""}>
-                <td>{row.year}</td>
-                <td>{formatCurrency(row.total_depreciation)}</td>
-                <td>{row.asset_count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-  );
+  }, []);
 
   const newAsset = (): Asset => ({
     name: "",
@@ -668,20 +215,126 @@ function App() {
     useful_life_years: 5,
   });
 
+  const handleAddAsset = useCallback(() => {
+    setEditingAsset(newAsset());
+    setView("asset-form");
+  }, []);
+
+  const handleViewAsset = useCallback((asset: AssetWithSchedule) => {
+    setSelectedAsset(asset);
+    setView("asset-detail");
+  }, []);
+
+  const handleEditAsset = useCallback(() => {
+    if (selectedAsset) {
+      setEditingAsset(selectedAsset.asset);
+      setView("asset-form");
+    }
+  }, [selectedAsset]);
+
+  const updateAssetField = <K extends keyof Asset>(field: K, value: Asset[K]) => {
+    if (editingAsset) {
+      setEditingAsset({ ...editingAsset, [field]: value });
+    }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingAsset) {
+      handleSaveAsset(editingAsset);
+    }
+  };
+
+  const handleScaleChange = useCallback((newScale: number) => {
+    setScale(newScale);
+  }, []);
+
+  const renderView = () => {
+    switch (view) {
+      case "dashboard":
+        return (
+          <Dashboard
+            stats={stats}
+            assets={assets}
+            annualSummary={annualSummary}
+            currentYear={currentYear}
+            onViewAsset={handleViewAsset}
+            onViewAllAssets={() => navigateTo("assets")}
+          />
+        );
+      case "assets":
+        return (
+          <AssetList
+            assets={assets}
+            currentYear={currentYear}
+            onViewAsset={handleViewAsset}
+            onAddAsset={handleAddAsset}
+          />
+        );
+      case "asset-detail":
+        return selectedAsset ? (
+          <AssetDetail
+            asset={selectedAsset}
+            currentYear={currentYear}
+            onEdit={handleEditAsset}
+            onDelete={handleDeleteAsset}
+            onDispose={handleDisposeAsset}
+            onBack={() => navigateTo("assets")}
+          />
+        ) : null;
+      case "asset-form":
+        return editingAsset ? (
+          <AssetForm
+            asset={editingAsset}
+            categories={categories}
+            isEditing={!!editingAsset.id}
+            onChange={updateAssetField}
+            onSubmit={handleFormSubmit}
+            onCancel={() => navigateTo("assets")}
+          />
+        ) : null;
+      case "reports":
+        return (
+          <Reports
+            annualSummary={annualSummary}
+            currentYear={currentYear}
+            onExportReport={handleExportReport}
+            onExportTemplate={handleExportTemplate}
+          />
+        );
+      case "settings":
+        return <Settings scale={scale} onScaleChange={handleScaleChange} />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="app-layout" onClick={clearMessages}>
-      {renderSidebar()}
+    <div
+      className="app-container flex h-screen w-screen overflow-hidden bg-[hsl(var(--background))]"
+      style={{ zoom: scale }}
+    >
+      <Sidebar
+        currentView={view}
+        onNavigate={navigateTo}
+        onImport={handleImport}
+        onExportTemplate={handleExportTemplate}
+        onAddAsset={handleAddAsset}
+      />
 
-      <main className="main-content">
-        {error && <div className="toast error">{error}</div>}
-        {success && <div className="toast success">{success}</div>}
-
-        {view === "dashboard" && renderDashboard()}
-        {view === "assets" && renderAssetList()}
-        {view === "asset-detail" && renderAssetDetail()}
-        {view === "asset-form" && renderAssetForm()}
-        {view === "reports" && renderReports()}
+      <main className="flex-1 min-w-0 overflow-hidden">
+        <ScrollArea className="h-full w-full">
+          <div className="p-6 lg:p-8">{renderView()}</div>
+        </ScrollArea>
       </main>
+
+      {/* Toast Notifications */}
+      {error && (
+        <Toast message={error} type="error" onClose={() => setError(null)} />
+      )}
+      {success && (
+        <Toast message={success} type="success" onClose={() => setSuccess(null)} />
+      )}
     </div>
   );
 }

@@ -1,9 +1,9 @@
-import { LayoutDashboard, Package, FileText, Upload, Download, Plus } from "lucide-react";
+import { LayoutDashboard, Package, FileText, Upload, Download, Plus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-type View = "dashboard" | "assets" | "asset-detail" | "asset-form" | "reports";
+type View = "dashboard" | "assets" | "asset-detail" | "asset-form" | "reports" | "settings";
 
 interface SidebarProps {
   currentView: View;
@@ -24,6 +24,7 @@ export function Sidebar({
     { id: "dashboard" as View, label: "Dashboard", icon: LayoutDashboard },
     { id: "assets" as View, label: "Assets", icon: Package },
     { id: "reports" as View, label: "Reports", icon: FileText },
+    { id: "settings" as View, label: "Settings", icon: Settings },
   ];
 
   const isViewActive = (itemId: View) => {
@@ -34,11 +35,11 @@ export function Sidebar({
   };
 
   return (
-    <aside className="flex h-screen w-64 flex-col bg-[hsl(var(--sidebar))] text-[hsl(var(--sidebar-foreground))]">
+    <aside className="flex h-full min-h-0 w-64 shrink-0 flex-col bg-[hsl(var(--sidebar))] text-[hsl(var(--sidebar-foreground))]">
       {/* Logo & Brand */}
       <div className="flex items-center gap-3 px-6 py-6">
-        <div className="flex h-10 w-10 items-center justify-center">
-          <img src="/logo-white-minimal.svg" alt="Abacus" className="h-10 w-10" />
+        <div className="flex h-14 w-14 items-center justify-center">
+          <img src="/logo-white-minimal.svg" alt="Abacus" className="h-14 w-14" />
         </div>
         <div className="flex flex-col">
           <span className="text-lg font-bold tracking-widest">ABACUS</span>
@@ -49,7 +50,7 @@ export function Sidebar({
       <Separator className="bg-[hsl(var(--sidebar-accent))]" />
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 min-h-0 overflow-y-auto space-y-1 px-3 py-4">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = isViewActive(item.id);

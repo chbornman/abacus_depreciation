@@ -1,7 +1,7 @@
-@import "tailwindcss";
-
 /* Modern font - Inter */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
 
 /* Tailwind v4 Theme */
 @theme {
@@ -136,6 +136,14 @@
   border-color: hsl(var(--border));
 }
 
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
@@ -143,6 +151,15 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* App container - fills viewport and handles zoom scaling */
+.app-container {
+  /* Use dvh/dvw for dynamic viewport units that work better with zoom */
+  min-height: 100dvh;
+  min-width: 100dvw;
+  max-height: 100dvh;
+  max-width: 100dvw;
 }
 
 /* Scrollbar styling */
