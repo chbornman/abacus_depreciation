@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Square frame with uniform thickness and rounded corners -->
+  <path d="M 50 40 L 150 40 Q 160 40 160 50 L 160 150 Q 160 160 150 160 L 50 160 Q 40 160 40 150 L 40 50 Q 40 40 50 40 Z
+           M 57 50 Q 50 50 50 57 L 50 143 Q 50 150 57 150 L 143 150 Q 150 150 150 143 L 150 57 Q 150 50 143 50 L 57 50 Z" 
+        fill="#000000" fill-rule="evenodd"/>
+  
+  <!-- Horizontal rods (spread out even more vertically) -->
+  <rect x="40" y="68" width="120" height="3" fill="#000000"/>
+  <rect x="40" y="98" width="120" height="3" fill="#000000"/>
+  <rect x="40" y="128" width="120" height="3" fill="#000000"/>
+  
+  <!-- Top row - thinner vertical elliptical beads with 1px spacing -->
+  <ellipse cx="60" cy="69.5" rx="7" ry="13" fill="#000000"/>
+  <ellipse cx="75" cy="69.5" rx="7" ry="13" fill="#000000"/>
+  <ellipse cx="90" cy="69.5" rx="7" ry="13" fill="#000000"/>
+  <ellipse cx="105" cy="69.5" rx="7" ry="13" fill="#000000"/>
+  
+  <!-- Middle row - thinner vertical elliptical beads with 1px spacing -->
+  <ellipse cx="60" cy="99.5" rx="7" ry="13" fill="#000000"/>
+  <ellipse cx="75" cy="99.5" rx="7" ry="13" fill="#000000"/>
+  <ellipse cx="90" cy="99.5" rx="7" ry="13" fill="#000000"/>
+  <ellipse cx="105" cy="99.5" rx="7" ry="13" fill="#000000"/>
+  
+  <!-- Bottom row - thinner vertical elliptical beads (3 left, 1 slightly separated) -->
+  <ellipse cx="60" cy="129.5" rx="7" ry="13" fill="#000000"/>
+  <ellipse cx="75" cy="129.5" rx="7" ry="13" fill="#000000"/>
+  <ellipse cx="90" cy="129.5" rx="7" ry="13" fill="#000000"/>
+  <!-- Single bead slightly separated from the group -->
+  <ellipse cx="112" cy="129.5" rx="7" ry="13" fill="#000000"/>
+</svg>
