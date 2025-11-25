@@ -1,5 +1,5 @@
-import { FileSpreadsheet, Download, FileDown, BarChart3 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Download, FileDown, BarChart3 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,47 +36,16 @@ export function Reports({
             Generate and export depreciation reports
           </p>
         </div>
-        <Button onClick={onExportReport} className="gap-2 shrink-0">
-          <Download className="h-4 w-4" />
-          Export to Excel
-        </Button>
-      </div>
-
-      {/* Report Cards */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card
-          className="cursor-pointer transition-all hover:border-[hsl(var(--primary))]/50 hover:shadow-md"
-          onClick={onExportReport}
-        >
-          <CardHeader className="flex flex-row items-start gap-4 space-y-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--primary))]/10">
-              <FileSpreadsheet className="h-6 w-6 text-[hsl(var(--primary))]" />
-            </div>
-            <div className="flex-1">
-              <CardTitle className="text-lg">Depreciation Report</CardTitle>
-              <CardDescription>
-                Full report with asset list, schedules, and annual summaries
-              </CardDescription>
-            </div>
-          </CardHeader>
-        </Card>
-
-        <Card
-          className="cursor-pointer transition-all hover:border-[hsl(var(--primary))]/50 hover:shadow-md"
-          onClick={onExportTemplate}
-        >
-          <CardHeader className="flex flex-row items-start gap-4 space-y-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--success))]/10">
-              <FileDown className="h-6 w-6 text-[hsl(var(--success))]" />
-            </div>
-            <div className="flex-1">
-              <CardTitle className="text-lg">Import Template</CardTitle>
-              <CardDescription>
-                Download a blank Excel template for importing assets
-              </CardDescription>
-            </div>
-          </CardHeader>
-        </Card>
+        <div className="flex gap-2 shrink-0">
+          <Button variant="outline" onClick={onExportTemplate} className="gap-2">
+            <FileDown className="h-4 w-4" />
+            Import Template
+          </Button>
+          <Button onClick={onExportReport} className="gap-2">
+            <Download className="h-4 w-4" />
+            Export to Excel
+          </Button>
+        </div>
       </div>
 
       {/* Annual Summary */}
