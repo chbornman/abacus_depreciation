@@ -55,11 +55,11 @@ export function AssetForm({
       <div className="flex items-center gap-2 text-sm">
         <button
           onClick={onCancel}
-          className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors"
+          className="text-muted-foreground hover:text-foreground transition-colors"
         >
           Assets
         </button>
-        <ChevronRight className="h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
         <span className="font-medium">{isEditing ? "Edit Asset" : "New Asset"}</span>
       </div>
 
@@ -73,7 +73,7 @@ export function AssetForm({
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">
-                  Asset Name <span className="text-[hsl(var(--destructive))]">*</span>
+                  Asset Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="name"
@@ -108,7 +108,7 @@ export function AssetForm({
 
               <div className="space-y-2">
                 <Label htmlFor="date">
-                  Date Placed in Service <span className="text-[hsl(var(--destructive))]">*</span>
+                  Date Placed in Service <span className="text-destructive">*</span>
                 </Label>
                 <DatePicker
                   id="date"
@@ -145,7 +145,7 @@ export function AssetForm({
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="cost">
-                  Cost <span className="text-[hsl(var(--destructive))]">*</span>
+                  Cost <span className="text-destructive">*</span>
                 </Label>
                 <NumberInput
                   id="cost"
@@ -169,7 +169,7 @@ export function AssetForm({
 
               <div className="space-y-2">
                 <Label htmlFor="life">
-                  Useful Life (Years) <span className="text-[hsl(var(--destructive))]">*</span>
+                  Useful Life (Years) <span className="text-destructive">*</span>
                 </Label>
                 <NumberInput
                   id="life"
@@ -207,16 +207,16 @@ export function AssetForm({
 
             {/* Depreciation Preview */}
             {annualDepreciation > 0 && (
-              <div className="rounded-xl border border-[hsl(var(--primary))]/20 bg-[hsl(var(--primary))]/5 p-4">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--primary))]/10">
-                    <Calculator className="h-5 w-5 text-[hsl(var(--primary))]" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <Calculator className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                    <div className="text-sm text-muted-foreground">
                       Annual Depreciation (Straight-Line)
                     </div>
-                    <div className="text-xl font-bold text-[hsl(var(--primary))]">
+                    <div className="text-xl font-bold text-primary">
                       {formatCurrency(annualDepreciation)}
                     </div>
                   </div>

@@ -327,7 +327,7 @@ function App() {
 
   return (
     <div
-      className="app-container flex h-screen w-screen overflow-hidden bg-[hsl(var(--background))]"
+      className="app-container flex h-screen w-screen overflow-hidden bg-background"
       style={{ zoom: scale }}
     >
       <Sidebar

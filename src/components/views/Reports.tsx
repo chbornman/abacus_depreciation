@@ -32,7 +32,7 @@ export function Reports({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
-          <p className="text-[hsl(var(--muted-foreground))]">
+          <p className="text-muted-foreground">
             Generate and export depreciation reports
           </p>
         </div>
@@ -51,15 +51,15 @@ export function Reports({
       {/* Annual Summary */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <BarChart3 className="h-5 w-5 text-[hsl(var(--muted-foreground))]" />
+          <BarChart3 className="h-5 w-5 text-muted-foreground" />
           <h2 className="text-xl font-semibold">Annual Summary</h2>
         </div>
 
         {annualSummary.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <BarChart3 className="h-12 w-12 text-[hsl(var(--muted-foreground))]/50 mb-4" />
-              <p className="text-[hsl(var(--muted-foreground))] text-center">
+              <BarChart3 className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground text-center">
                 No depreciation data yet. Add some assets first.
               </p>
             </CardContent>
@@ -80,7 +80,7 @@ export function Reports({
                     <TableRow
                       key={row.year}
                       className={
-                        row.year === currentYear ? "bg-[hsl(var(--primary))]/5" : ""
+                        row.year === currentYear ? "bg-primary/5" : ""
                       }
                     >
                       <TableCell className="font-medium">

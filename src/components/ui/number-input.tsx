@@ -86,7 +86,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     return (
       <div
         className={cn(
-          "flex h-10 w-full items-center rounded-lg border border-[hsl(var(--input))] bg-[hsl(var(--background))] ring-offset-[hsl(var(--background))] transition-colors focus-within:ring-2 focus-within:ring-[hsl(var(--ring))] focus-within:ring-offset-2",
+          "flex h-10 w-full items-center rounded-lg border border-input bg-background ring-offset-background transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           disabled && "cursor-not-allowed opacity-50",
           className
         )}
@@ -95,14 +95,14 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           type="button"
           onClick={decrement}
           disabled={disabled || !canDecrement}
-          className="flex h-full items-center justify-center px-3 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="flex h-full items-center justify-center px-3 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           tabIndex={-1}
         >
           <Minus className="h-4 w-4" />
         </button>
         <div className="flex flex-1 items-center">
           {prefix && (
-            <span className="text-sm text-[hsl(var(--muted-foreground))] select-none">
+            <span className="text-sm text-muted-foreground select-none">
               {prefix}
             </span>
           )}
@@ -115,7 +115,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             onKeyDown={handleKeyDown}
             disabled={disabled}
             className={cn(
-              "flex-1 bg-transparent px-1 py-2 text-center text-sm outline-none placeholder:text-[hsl(var(--muted-foreground))] disabled:cursor-not-allowed",
+              "flex-1 bg-transparent px-1 py-2 text-center text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed",
               "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             )}
             {...props}
@@ -125,7 +125,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           type="button"
           onClick={increment}
           disabled={disabled || !canIncrement}
-          className="flex h-full items-center justify-center px-3 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="flex h-full items-center justify-center px-3 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           tabIndex={-1}
         >
           <Plus className="h-4 w-4" />

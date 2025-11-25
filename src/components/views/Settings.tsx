@@ -41,7 +41,7 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-[hsl(var(--muted-foreground))]">
+        <p className="text-muted-foreground">
           Customize your application preferences
         </p>
       </div>
@@ -50,8 +50,8 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[hsl(var(--primary))]/10">
-              <Monitor className="h-5 w-5 text-[hsl(var(--primary))]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Monitor className="h-5 w-5 text-primary" />
             </div>
             <div>
               <CardTitle>Display</CardTitle>
@@ -76,7 +76,7 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
               </Button>
 
               <div className="min-w-[80px] text-center">
-                <span className="text-2xl font-bold text-[hsl(var(--primary))]">
+                <span className="text-2xl font-bold text-primary">
                   {scalePercent}%
                 </span>
               </div>
@@ -114,17 +114,17 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
                 className={cn(
                   "flex flex-1 flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors",
                   theme === "light"
-                    ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary))]/5"
-                    : "border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]/50"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
                 )}
               >
                 <Sun className={cn(
                   "h-6 w-6",
-                  theme === "light" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                  theme === "light" ? "text-primary" : "text-muted-foreground"
                 )} />
                 <span className={cn(
                   "text-sm font-medium",
-                  theme === "light" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                  theme === "light" ? "text-primary" : "text-muted-foreground"
                 )}>Light</span>
               </button>
               <button
@@ -132,17 +132,17 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
                 className={cn(
                   "flex flex-1 flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors",
                   theme === "system"
-                    ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary))]/5"
-                    : "border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]/50"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
                 )}
               >
                 <Monitor className={cn(
                   "h-6 w-6",
-                  theme === "system" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                  theme === "system" ? "text-primary" : "text-muted-foreground"
                 )} />
                 <span className={cn(
                   "text-sm font-medium",
-                  theme === "system" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                  theme === "system" ? "text-primary" : "text-muted-foreground"
                 )}>System</span>
               </button>
               <button
@@ -150,17 +150,17 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
                 className={cn(
                   "flex flex-1 flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors",
                   theme === "dark"
-                    ? "border-[hsl(var(--primary))] bg-[hsl(var(--primary))]/5"
-                    : "border-[hsl(var(--border))] hover:border-[hsl(var(--primary))]/50"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
                 )}
               >
                 <Moon className={cn(
                   "h-6 w-6",
-                  theme === "dark" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                  theme === "dark" ? "text-primary" : "text-muted-foreground"
                 )} />
                 <span className={cn(
                   "text-sm font-medium",
-                  theme === "dark" ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"
+                  theme === "dark" ? "text-primary" : "text-muted-foreground"
                 )}>Dark</span>
               </button>
             </div>
@@ -172,38 +172,38 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
           <div className="space-y-3">
             <div className="font-medium">Keyboard Shortcuts</div>
             <div className="grid gap-2 text-sm">
-              <div className="flex items-center justify-between rounded-lg bg-[hsl(var(--muted))]/50 px-3 py-2">
-                <span className="text-[hsl(var(--muted-foreground))]">Zoom In</span>
+              <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                <span className="text-muted-foreground">Zoom In</span>
                 <div className="flex items-center gap-1">
-                  <kbd className="rounded bg-[hsl(var(--muted))] px-2 py-0.5 font-mono text-xs">
+                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
                     Ctrl
                   </kbd>
                   <span>+</span>
-                  <kbd className="rounded bg-[hsl(var(--muted))] px-2 py-0.5 font-mono text-xs">
+                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
                     +
                   </kbd>
                 </div>
               </div>
-              <div className="flex items-center justify-between rounded-lg bg-[hsl(var(--muted))]/50 px-3 py-2">
-                <span className="text-[hsl(var(--muted-foreground))]">Zoom Out</span>
+              <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                <span className="text-muted-foreground">Zoom Out</span>
                 <div className="flex items-center gap-1">
-                  <kbd className="rounded bg-[hsl(var(--muted))] px-2 py-0.5 font-mono text-xs">
+                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
                     Ctrl
                   </kbd>
                   <span>+</span>
-                  <kbd className="rounded bg-[hsl(var(--muted))] px-2 py-0.5 font-mono text-xs">
+                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
                     -
                   </kbd>
                 </div>
               </div>
-              <div className="flex items-center justify-between rounded-lg bg-[hsl(var(--muted))]/50 px-3 py-2">
-                <span className="text-[hsl(var(--muted-foreground))]">Reset Zoom</span>
+              <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                <span className="text-muted-foreground">Reset Zoom</span>
                 <div className="flex items-center gap-1">
-                  <kbd className="rounded bg-[hsl(var(--muted))] px-2 py-0.5 font-mono text-xs">
+                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
                     Ctrl
                   </kbd>
                   <span>+</span>
-                  <kbd className="rounded bg-[hsl(var(--muted))] px-2 py-0.5 font-mono text-xs">
+                  <kbd className="rounded bg-muted px-2 py-0.5 font-mono text-xs">
                     0
                   </kbd>
                 </div>
@@ -235,7 +235,7 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategor
             />
             <div>
               <div className="font-bold tracking-widest">ABACUS</div>
-              <div className="text-sm text-[hsl(var(--muted-foreground))]">
+              <div className="text-sm text-muted-foreground">
                 Depreciation Tracker v0.1.0
               </div>
             </div>

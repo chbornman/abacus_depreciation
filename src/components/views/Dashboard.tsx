@@ -64,7 +64,7 @@ export function Dashboard({
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-[hsl(var(--muted-foreground))]">
+        <p className="text-muted-foreground">
           Overview of your fixed assets and depreciation
         </p>
       </div>
@@ -79,26 +79,26 @@ export function Dashboard({
                 key={index}
                 className={
                   stat.variant === "primary"
-                    ? "border-[hsl(var(--primary))]/20 bg-gradient-to-br from-[hsl(var(--primary))]/5 to-transparent"
+                    ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
                     : ""
                 }
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[hsl(var(--muted-foreground))]">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </CardTitle>
                   <Icon
                     className={`h-5 w-5 ${
                       stat.variant === "primary"
-                        ? "text-[hsl(var(--primary))]"
-                        : "text-[hsl(var(--muted-foreground))]"
+                        ? "text-primary"
+                        : "text-muted-foreground"
                     }`}
                   />
                 </CardHeader>
                 <CardContent>
                   <div
                     className={`text-2xl font-bold ${
-                      stat.variant === "primary" ? "text-[hsl(var(--primary))]" : ""
+                      stat.variant === "primary" ? "text-primary" : ""
                     }`}
                   >
                     {stat.value}
@@ -123,8 +123,8 @@ export function Dashboard({
         {assets.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Package className="h-12 w-12 text-[hsl(var(--muted-foreground))]/50 mb-4" />
-              <p className="text-[hsl(var(--muted-foreground))] text-center">
+              <Package className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground text-center">
                 No assets yet. Import from Excel or add one manually.
               </p>
             </CardContent>
@@ -132,7 +132,7 @@ export function Dashboard({
         ) : (
           <Card>
             <CardContent className="p-0">
-              <div className="divide-y divide-[hsl(var(--border))]">
+              <div className="divide-y divide-border">
                 {assets.slice(0, 5).map((item) => {
                   const currentDepr =
                     item.schedule.find((s) => s.year === currentYear)?.depreciation_expense || 0;
@@ -140,7 +140,7 @@ export function Dashboard({
                     <button
                       key={item.asset.id}
                       onClick={() => onViewAsset(item)}
-                      className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-[hsl(var(--muted))]/50 text-left"
+                      className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50 text-left"
                     >
                       <div className="space-y-1">
                         <div className="font-medium">{item.asset.name}</div>
@@ -155,7 +155,7 @@ export function Dashboard({
                       </div>
                       <div className="text-right space-y-1">
                         <div className="font-medium">{formatCurrency(item.asset.cost)}</div>
-                        <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                        <div className="text-sm text-muted-foreground">
                           {formatCurrency(currentDepr)}/yr
                         </div>
                       </div>
@@ -188,7 +188,7 @@ export function Dashboard({
                       key={row.year}
                       className={
                         row.year === currentYear
-                          ? "bg-[hsl(var(--primary))]/5"
+                          ? "bg-primary/5"
                           : ""
                       }
                     >

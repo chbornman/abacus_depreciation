@@ -32,7 +32,7 @@ export function AssetList({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight">Assets</h1>
-          <p className="text-[hsl(var(--muted-foreground))]">
+          <p className="text-muted-foreground">
             Manage your fixed assets and view depreciation details
           </p>
         </div>
@@ -46,9 +46,9 @@ export function AssetList({
       {assets.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <Package className="h-16 w-16 text-[hsl(var(--muted-foreground))]/50 mb-4" />
+            <Package className="h-16 w-16 text-muted-foreground/50 mb-4" />
             <h3 className="text-lg font-medium mb-2">No assets yet</h3>
-            <p className="text-[hsl(var(--muted-foreground))] text-center mb-6">
+            <p className="text-muted-foreground text-center mb-6">
               Get started by adding your first asset or importing from Excel.
             </p>
             <Button onClick={onAddAsset} className="gap-2">
@@ -86,7 +86,7 @@ export function AssetList({
                         {item.category_name ? (
                           <Badge variant="secondary">{item.category_name}</Badge>
                         ) : (
-                          <span className="text-[hsl(var(--muted-foreground))]">—</span>
+                          <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right font-mono">

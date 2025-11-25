@@ -41,14 +41,14 @@ export function Sidebar({
   };
 
   return (
-    <aside className="flex h-full min-h-0 w-64 shrink-0 flex-col bg-[hsl(var(--sidebar))] text-[hsl(var(--sidebar-foreground))]">
+    <aside className="flex h-full min-h-0 w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
       {/* Logo & Brand */}
       <div className="shrink-0 flex items-center justify-center gap-2 px-6 py-5">
         <img src="/logo-white-minimal.svg" alt="Abacus" className="h-12 w-12 flex-none" />
         <span className="text-3xl font-bold tracking-wider flex-none">ABACUS</span>
       </div>
 
-      <Separator className="bg-[hsl(var(--sidebar-accent))]" />
+      <Separator className="bg-sidebar-accent" />
 
       {/* Navigation */}
       <nav className="flex-1 min-h-0 overflow-y-auto space-y-1 px-3 py-4">
@@ -62,8 +62,8 @@ export function Sidebar({
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-[hsl(var(--sidebar-accent))] text-white"
-                  : "text-[hsl(var(--sidebar-muted))] hover:bg-[hsl(var(--sidebar-accent))]/50 hover:text-white"
+                  ? "bg-sidebar-accent text-white"
+                  : "text-sidebar-muted hover:bg-sidebar-accent/50 hover:text-white"
               )}
             >
               <Icon className="h-5 w-5" />
@@ -75,17 +75,17 @@ export function Sidebar({
 
       {/* Actions */}
       <div className="shrink-0 space-y-2 px-3 pb-3">
-        <Separator className="bg-[hsl(var(--sidebar-accent))] mb-3" />
+        <Separator className="bg-sidebar-accent mb-3" />
         <button
           onClick={onImport}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[hsl(var(--sidebar-muted))] transition-colors hover:bg-[hsl(var(--sidebar-accent))]/50 hover:text-white"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-muted transition-colors hover:bg-sidebar-accent/50 hover:text-white"
         >
           <Upload className="h-4 w-4" />
           Import Excel
         </button>
         <button
           onClick={onExportTemplate}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[hsl(var(--sidebar-muted))] transition-colors hover:bg-[hsl(var(--sidebar-accent))]/50 hover:text-white"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-muted transition-colors hover:bg-sidebar-accent/50 hover:text-white"
         >
           <Download className="h-4 w-4" />
           Download Template
@@ -94,15 +94,15 @@ export function Sidebar({
 
       {/* Theme Toggle */}
       <div className="shrink-0 px-3 pb-2">
-        <Separator className="bg-[hsl(var(--sidebar-accent))] mb-3" />
-        <div className="flex items-center justify-between rounded-lg bg-[hsl(var(--sidebar-accent))]/30 p-1">
+        <Separator className="bg-sidebar-accent mb-3" />
+        <div className="flex items-center justify-between rounded-lg bg-sidebar-accent/30 p-1">
           <button
             onClick={() => onThemeChange("light")}
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
               theme === "light"
-                ? "bg-[hsl(var(--sidebar-accent))] text-white"
-                : "text-[hsl(var(--sidebar-muted))] hover:text-white"
+                ? "bg-sidebar-accent text-white"
+                : "text-sidebar-muted hover:text-white"
             )}
           >
             <Sun className="h-3.5 w-3.5" />
@@ -112,8 +112,8 @@ export function Sidebar({
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
               theme === "system"
-                ? "bg-[hsl(var(--sidebar-accent))] text-white"
-                : "text-[hsl(var(--sidebar-muted))] hover:text-white"
+                ? "bg-sidebar-accent text-white"
+                : "text-sidebar-muted hover:text-white"
             )}
           >
             <Monitor className="h-3.5 w-3.5" />
@@ -123,8 +123,8 @@ export function Sidebar({
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
               theme === "dark"
-                ? "bg-[hsl(var(--sidebar-accent))] text-white"
-                : "text-[hsl(var(--sidebar-muted))] hover:text-white"
+                ? "bg-sidebar-accent text-white"
+                : "text-sidebar-muted hover:text-white"
             )}
           >
             <Moon className="h-3.5 w-3.5" />

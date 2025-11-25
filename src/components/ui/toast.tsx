@@ -19,9 +19,9 @@ export function Toast({ message, type, onClose }: ToastProps) {
       className={cn(
         "fixed right-4 top-4 z-50 flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg backdrop-blur-sm animate-in slide-in-from-top-2 fade-in duration-300",
         type === "success" &&
-          "border-[hsl(var(--success))]/20 bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]",
+          "border-success/20 bg-success/10 text-success",
         type === "error" &&
-          "border-[hsl(var(--destructive))]/20 bg-[hsl(var(--destructive))]/10 text-[hsl(var(--destructive))]"
+          "border-destructive/20 bg-destructive/10 text-destructive"
       )}
     >
       {type === "success" ? (

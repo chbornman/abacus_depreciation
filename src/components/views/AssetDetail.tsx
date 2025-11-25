@@ -64,11 +64,11 @@ export function AssetDetail({
         <div className="flex items-center gap-2 text-sm min-w-0">
           <button
             onClick={onBack}
-            className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors shrink-0"
+            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             Assets
           </button>
-          <ChevronRight className="h-4 w-4 text-[hsl(var(--muted-foreground))] shrink-0" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
           <span className="font-medium truncate">{assetData.name}</span>
           {assetData.disposed_date && (
             <Badge variant="destructive" className="ml-2 shrink-0">Disposed</Badge>
@@ -102,7 +102,7 @@ export function AssetDetail({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {detailItems.map((item) => (
               <div key={item.label} className="space-y-1">
-                <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                <div className="text-sm text-muted-foreground">
                   {item.label}
                 </div>
                 <div className="font-medium">{item.value}</div>
@@ -116,7 +116,7 @@ export function AssetDetail({
               <div className="grid gap-4 md:grid-cols-2">
                 {assetData.description && (
                   <div className="space-y-1">
-                    <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                    <div className="text-sm text-muted-foreground">
                       Description
                     </div>
                     <div>{assetData.description}</div>
@@ -124,7 +124,7 @@ export function AssetDetail({
                 )}
                 {assetData.notes && (
                   <div className="space-y-1">
-                    <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                    <div className="text-sm text-muted-foreground">
                       Notes
                     </div>
                     <div>{assetData.notes}</div>
@@ -156,13 +156,13 @@ export function AssetDetail({
                 return (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <div className="space-y-1">
-                      <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                      <div className="text-sm text-muted-foreground">
                         Disposed Date
                       </div>
                       <div className="font-medium">{formatDate(assetData.disposed_date)}</div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                      <div className="text-sm text-muted-foreground">
                         Book Value at Disposal
                       </div>
                       <div className="font-medium font-mono">
@@ -170,7 +170,7 @@ export function AssetDetail({
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                      <div className="text-sm text-muted-foreground">
                         Sale Price
                       </div>
                       <div className="font-medium font-mono">
@@ -181,7 +181,7 @@ export function AssetDetail({
                     </div>
                     {hasGainLoss && (
                       <div className="space-y-1">
-                        <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                        <div className="text-sm text-muted-foreground">
                           {gainLoss >= 0 ? "Gain on Sale" : "Loss on Sale"}
                         </div>
                         <div className={`font-medium font-mono ${
@@ -223,7 +223,7 @@ export function AssetDetail({
                 <TableRow
                   key={entry.year}
                   className={
-                    entry.year === currentYear ? "bg-[hsl(var(--primary))]/5" : ""
+                    entry.year === currentYear ? "bg-primary/5" : ""
                   }
                 >
                   <TableCell className="font-medium">{entry.year}</TableCell>
@@ -256,8 +256,8 @@ export function AssetDetail({
         <DialogContent>
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--destructive))]/10">
-                <Trash2 className="h-5 w-5 text-[hsl(var(--destructive))]" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <Trash2 className="h-5 w-5 text-destructive" />
               </div>
               <div>
                 <DialogTitle>Delete Asset</DialogTitle>
@@ -267,7 +267,7 @@ export function AssetDetail({
               </div>
             </div>
           </DialogHeader>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+          <p className="text-sm text-muted-foreground">
             Are you sure you want to delete "{assetData.name}"? This will permanently
             remove the asset and all associated depreciation records.
           </p>

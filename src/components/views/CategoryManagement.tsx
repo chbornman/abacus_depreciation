@@ -158,8 +158,8 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[hsl(var(--primary))]/10">
-              <Tag className="h-5 w-5 text-[hsl(var(--primary))]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Tag className="h-5 w-5 text-primary" />
             </div>
             <div>
               <CardTitle>Categories</CardTitle>
@@ -174,15 +174,15 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="text-center py-8 text-[hsl(var(--muted-foreground))]">
+          <div className="text-center py-8 text-muted-foreground">
             Loading categories...
           </div>
         ) : error ? (
-          <div className="text-center py-8 text-[hsl(var(--destructive))]">
+          <div className="text-center py-8 text-destructive">
             Error loading categories: {error}
           </div>
         ) : categories.length === 0 ? (
-          <div className="text-center py-8 text-[hsl(var(--muted-foreground))]">
+          <div className="text-center py-8 text-muted-foreground">
             No categories yet. Click "Add Category" to create one.
           </div>
         ) : (
@@ -190,12 +190,12 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
             {categories.map((category) => (
               <div
                 key={category.id}
-                className="flex items-center justify-between rounded-lg border border-[hsl(var(--border))] px-4 py-3 hover:bg-[hsl(var(--muted))]/50 transition-colors"
+                className="flex items-center justify-between rounded-lg border border-border px-4 py-3 hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div>
                     <div className="font-medium">{category.name}</div>
-                    <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                    <div className="text-sm text-muted-foreground">
                       {category.default_useful_life && (
                         <span>{category.default_useful_life} years</span>
                       )}
@@ -227,7 +227,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
                     variant="ghost"
                     size="icon"
                     onClick={() => handleDeleteClick(category)}
-                    className="h-8 w-8 text-[hsl(var(--destructive))] hover:text-[hsl(var(--destructive))] hover:bg-[hsl(var(--destructive))]/10"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -271,7 +271,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
                   onChange={(value) => setFormData({ ...formData, default_useful_life: value })}
                   placeholder="e.g., 5"
                 />
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                <p className="text-xs text-muted-foreground">
                   Suggested useful life for assets in this category
                 </p>
               </div>
@@ -295,7 +295,7 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                <p className="text-xs text-muted-foreground">
                   IRS property classification for depreciation
                 </p>
               </div>
@@ -321,13 +321,13 @@ export function CategoryManagement({ onCategoriesChange }: CategoryManagementPro
               </DialogDescription>
             </DialogHeader>
             {deleteError && (
-              <div className="flex items-start gap-2 rounded-lg bg-[hsl(var(--destructive))]/10 p-3 text-sm text-[hsl(var(--destructive))]">
+              <div className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>{deleteError}</span>
               </div>
             )}
             {categoryToDelete && categoryToDelete.asset_count > 0 && !deleteError && (
-              <div className="flex items-start gap-2 rounded-lg bg-[hsl(var(--warning))]/10 p-3 text-sm text-amber-600 dark:text-amber-500">
+              <div className="flex items-start gap-2 rounded-lg bg-warning/10 p-3 text-sm text-amber-600 dark:text-amber-500">
                 <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>
                   This category has {categoryToDelete.asset_count} asset{categoryToDelete.asset_count !== 1 ? "s" : ""}.

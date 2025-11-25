@@ -82,7 +82,7 @@ export function AssetFormDialog({
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">
-                  Asset Name <span className="text-[hsl(var(--destructive))]">*</span>
+                  Asset Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="name"
@@ -117,7 +117,7 @@ export function AssetFormDialog({
 
               <div className="space-y-2">
                 <Label htmlFor="date">
-                  Date Placed in Service <span className="text-[hsl(var(--destructive))]">*</span>
+                  Date Placed in Service <span className="text-destructive">*</span>
                 </Label>
                 <DatePicker
                   id="date"
@@ -154,7 +154,7 @@ export function AssetFormDialog({
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="cost">
-                  Cost <span className="text-[hsl(var(--destructive))]">*</span>
+                  Cost <span className="text-destructive">*</span>
                 </Label>
                 <NumberInput
                   id="cost"
@@ -178,7 +178,7 @@ export function AssetFormDialog({
 
               <div className="space-y-2">
                 <Label htmlFor="life">
-                  Useful Life (Years) <span className="text-[hsl(var(--destructive))]">*</span>
+                  Useful Life (Years) <span className="text-destructive">*</span>
                 </Label>
                 <NumberInput
                   id="life"
@@ -224,7 +224,7 @@ export function AssetFormDialog({
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="disposed_date">
-                        Disposal Date <span className="text-[hsl(var(--destructive))]">*</span>
+                        Disposal Date <span className="text-destructive">*</span>
                       </Label>
                       <DatePicker
                         id="disposed_date"
@@ -244,7 +244,7 @@ export function AssetFormDialog({
                         onChange={(value) => onChange("disposed_value", value)}
                         placeholder="0.00"
                       />
-                      <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                      <p className="text-xs text-muted-foreground">
                         Leave blank if scrapped with no value
                       </p>
                     </div>
@@ -279,16 +279,16 @@ export function AssetFormDialog({
 
             {/* Depreciation Preview */}
             {annualDepreciation > 0 && (
-              <div className="rounded-xl border border-[hsl(var(--primary))]/20 bg-[hsl(var(--primary))]/5 p-4">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--primary))]/10">
-                    <Calculator className="h-5 w-5 text-[hsl(var(--primary))]" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <Calculator className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm text-[hsl(var(--muted-foreground))]">
+                    <div className="text-sm text-muted-foreground">
                       Annual Depreciation (Straight-Line)
                     </div>
-                    <div className="text-xl font-bold text-[hsl(var(--primary))]">
+                    <div className="text-xl font-bold text-primary">
                       {formatCurrency(annualDepreciation)}
                     </div>
                   </div>

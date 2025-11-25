@@ -50,8 +50,8 @@ export function DisposeDialog({
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--warning))]/10">
-              <AlertTriangle className="h-5 w-5 text-[hsl(var(--warning))]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10">
+              <AlertTriangle className="h-5 w-5 text-warning" />
             </div>
             <div>
               <DialogTitle>Mark Asset as Disposed</DialogTitle>
@@ -76,7 +76,7 @@ export function DisposeDialog({
           <div className="space-y-2">
             <Label htmlFor="dispose-value">
               Sale/Disposal Value{" "}
-              <span className="text-[hsl(var(--muted-foreground))] font-normal">
+              <span className="text-muted-foreground font-normal">
                 (optional)
               </span>
             </Label>
