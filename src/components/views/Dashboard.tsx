@@ -36,25 +36,21 @@ export function Dashboard({
           title: "Total Assets",
           value: formatNumber(stats.total_assets),
           icon: Briefcase,
-          variant: "default" as const,
         },
         {
           title: `${currentYear} Depreciation`,
           value: formatCurrency(stats.current_year_depreciation),
           icon: TrendingUp,
-          variant: "primary" as const,
         },
         {
           title: "Total Book Value",
           value: formatCurrency(stats.total_book_value),
           icon: Calculator,
-          variant: "default" as const,
         },
         {
           title: "Total Cost",
           value: formatCurrency(stats.total_cost),
           icon: DollarSign,
-          variant: "default" as const,
         },
       ]
     : [];
@@ -77,32 +73,16 @@ export function Dashboard({
             return (
               <Card
                 key={index}
-                className={
-                  stat.variant === "primary"
-                    ? "border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
-                    : ""
-                }
+                className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </CardTitle>
-                  <Icon
-                    className={`h-5 w-5 ${
-                      stat.variant === "primary"
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    }`}
-                  />
+                  <Icon className="h-5 w-5 text-primary" />
                 </CardHeader>
                 <CardContent>
-                  <div
-                    className={`text-2xl font-bold ${
-                      stat.variant === "primary" ? "text-primary" : ""
-                    }`}
-                  >
-                    {stat.value}
-                  </div>
+                  <div className="text-2xl font-bold">{stat.value}</div>
                 </CardContent>
               </Card>
             );
