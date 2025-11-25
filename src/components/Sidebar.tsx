@@ -42,9 +42,9 @@ export function Sidebar({
   return (
     <aside className="flex h-full min-h-0 w-64 shrink-0 flex-col bg-[hsl(var(--sidebar))] text-[hsl(var(--sidebar-foreground))]">
       {/* Logo & Brand */}
-      <div className="shrink-0 flex items-center justify-center gap-4 px-6 py-8">
-        <img src="/logo-white-minimal.svg" alt="Abacus" className="h-12 w-12" />
-        <span className="text-3xl font-bold tracking-wider">ABACUS</span>
+      <div className="shrink-0 flex items-center justify-center gap-2 px-6 py-5">
+        <img src="/logo-white-minimal.svg" alt="Abacus" className="h-12 w-12 flex-none" />
+        <span className="text-3xl font-bold tracking-wider flex-none">ABACUS</span>
       </div>
 
       <Separator className="bg-[hsl(var(--sidebar-accent))]" />
