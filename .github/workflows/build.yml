@@ -1,9 +1,9 @@
-name: Build
+name: Release
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -16,10 +16,7 @@ jobs:
             name: Linux
           - platform: macos-latest
             target: aarch64-apple-darwin
-            name: macOS-ARM
-          - platform: macos-13
-            target: x86_64-apple-darwin
-            name: macOS-Intel
+            name: macOS
           - platform: windows-latest
             target: x86_64-pc-windows-msvc
             name: Windows
@@ -59,40 +56,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: --target ${{ matrix.target }}
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Abacus Depreciation ${{ github.ref_name }}'
+          releaseBody: |
+            See the assets below to download the installer for your platform.
 
-      - name: Upload Linux artifacts
-        if: matrix.platform == 'ubuntu-22.04'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Abacus-Linux
-          path: |
-            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
-            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/rpm/*.rpm
-            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+            **macOS:** Download the `.dmg` file
+            **Windows:** Download the `.msi` or `.exe` installer
+            **Linux:** Download the `.AppImage`, `.deb`, or `.rpm` package
+          releaseDraft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
 
-      - name: Upload macOS ARM artifacts
-        if: matrix.target == 'aarch64-apple-darwin'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Abacus-macOS-ARM
-          path: |
-            src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
-            src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app
-
-      - name: Upload macOS Intel artifacts
-        if: matrix.target == 'x86_64-apple-darwin'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Abacus-macOS-Intel
-          path: |
-            src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
-            src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app
-
-      - name: Upload Windows artifacts
-        if: matrix.platform == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Abacus-Windows
-          path: |
-            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
-            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe

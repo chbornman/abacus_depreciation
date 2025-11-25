@@ -254,6 +254,38 @@ bun run tauri dev
 bun run tauri build
 ```
 
+## Releases & Versioning
+
+### Download
+
+Pre-built installers are available on the [Releases](../../releases) page:
+
+- **macOS**: `.dmg` file (Apple Silicon)
+- **Windows**: `.msi` or `.exe` installer
+- **Linux**: `.AppImage`, `.deb`, or `.rpm` package
+
+### Versioning
+
+This project uses [Semantic Versioning](https://semver.org/):
+
+| Version | Meaning |
+|---------|---------|
+| `0.x.x` | Pre-release development |
+| `1.0.0` | First stable release |
+| `x.Y.0` | New features (backwards compatible) |
+| `x.x.Z` | Bug fixes |
+
+Tags with a suffix (e.g., `v0.2.0-beta.1`) are marked as prereleases.
+
+### Creating a Release
+
+1. Update version in `src-tauri/tauri.conf.json` and `package.json`
+2. Commit: `git commit -am "Bump version to x.y.z"`
+3. Tag: `git tag vx.y.z`
+4. Push: `git push && git push --tags`
+
+GitHub Actions will automatically build for all platforms and create a release.
+
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
