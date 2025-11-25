@@ -60,25 +60,25 @@ export function Dashboard({
       </div>
 
       {/* Navigation Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {navCards.map((card) => {
           const Icon = card.icon;
           return (
             <button
               key={card.id}
               onClick={() => onNavigate(card.id)}
-              className="text-left"
+              className="text-left w-full"
             >
               <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 to-transparent transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="rounded-xl bg-primary/10 p-4">
-                      <Icon className="h-8 w-8 text-primary" />
+                <CardContent className="p-6 sm:p-8">
+                  <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <div className="rounded-xl bg-primary/10 p-3 sm:p-4">
+                      <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
                     </div>
-                    <h3 className="text-2xl font-semibold">{card.title}</h3>
+                    <h3 className="text-xl sm:text-2xl font-semibold">{card.title}</h3>
                   </div>
-                  <div className={`text-4xl font-bold mb-2 ${card.valueClass}`}>{card.value}</div>
-                  <p className="text-muted-foreground">{card.subtitle}</p>
+                  <div className={`text-2xl sm:text-4xl font-bold mb-2 truncate ${card.valueClass}`}>{card.value}</div>
+                  <p className="text-muted-foreground text-sm sm:text-base">{card.subtitle}</p>
                 </CardContent>
               </Card>
             </button>
