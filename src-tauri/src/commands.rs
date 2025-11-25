@@ -115,6 +115,77 @@ pub fn create_category(db: State<Database>, category: Category) -> Result<i64> {
     Ok(conn.last_insert_rowid())
 }
 
+#[tauri::command]
+pub fn update_category(db: State<Database>, category: Category) -> Result<()> {
+    let conn = db.conn.lock().map_err(map_err)?;
+    let id = category.id.ok_or("Category ID required")?;
+
+    conn.execute(
+        "UPDATE categories SET name = ?1, default_useful_life = ?2, default_property_class = ?3 WHERE id = ?4",
+        params![category.name, category.default_useful_life, category.default_property_class, id],
+    )
+    .map_err(map_err)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn delete_category(db: State<Database>, id: i64) -> Result<()> {
+    let conn = db.conn.lock().map_err(map_err)?;
+
+    // Check if any assets are using this category
+    let asset_count: i64 = conn
+        .query_row(
+            "SELECT COUNT(*) FROM assets WHERE category_id = ?1",
+            [id],
+            |row| row.get(0),
+        )
+        .map_err(map_err)?;
+
+    if asset_count > 0 {
+        return Err(format!(
+            "Cannot delete category: {} asset(s) are using this category. Please reassign them first.",
+            asset_count
+        ));
+    }
+
+    conn.execute("DELETE FROM categories WHERE id = ?1", [id])
+        .map_err(map_err)?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_categories_with_counts(db: State<Database>) -> Result<Vec<CategoryWithCount>> {
+    let conn = db.conn.lock().map_err(map_err)?;
+    let mut stmt = conn
+        .prepare(
+            "SELECT c.id, c.name, c.default_useful_life, c.default_property_class,
+                    COUNT(a.id) as asset_count
+             FROM categories c
+             LEFT JOIN assets a ON c.id = a.category_id
+             GROUP BY c.id
+             ORDER BY c.name",
+        )
+        .map_err(map_err)?;
+
+    let categories = stmt
+        .query_map([], |row| {
+            Ok(CategoryWithCount {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                default_useful_life: row.get(2)?,
+                default_property_class: row.get(3)?,
+                asset_count: row.get(4)?,
+            })
+        })
+        .map_err(map_err)?
+        .filter_map(|r| r.ok())
+        .collect();
+
+    Ok(categories)
+}
+
 // ============ Assets ============
 
 #[tauri::command]

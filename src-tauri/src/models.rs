@@ -9,6 +9,15 @@ pub struct Category {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CategoryWithCount {
+    pub id: i64,
+    pub name: String,
+    pub default_useful_life: Option<i32>,
+    pub default_property_class: Option<String>,
+    pub asset_count: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Asset {
     pub id: Option<i64>,
     pub name: String,

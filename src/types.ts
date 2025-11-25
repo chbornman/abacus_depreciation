@@ -5,6 +5,14 @@ export interface Category {
   default_property_class?: string;
 }
 
+export interface CategoryWithCount {
+  id: number;
+  name: string;
+  default_useful_life?: number;
+  default_property_class?: string;
+  asset_count: number;
+}
+
 export interface Asset {
   id?: number;
   name: string;

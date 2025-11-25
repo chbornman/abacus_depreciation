@@ -19,7 +19,10 @@ pub fn run() {
             commands::get_dashboard_stats,
             // Categories
             commands::get_categories,
+            commands::get_categories_with_counts,
             commands::create_category,
+            commands::update_category,
+            commands::delete_category,
             // Assets
             commands::get_assets,
             commands::get_asset,

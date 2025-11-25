@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { CategoryManagement } from "./CategoryManagement";
 
 type Theme = "light" | "dark" | "system";
 
@@ -11,13 +12,14 @@ interface SettingsProps {
   onScaleChange: (scale: number) => void;
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
+  onCategoriesChange?: () => void;
 }
 
 const MIN_SCALE = 0.75;
 const MAX_SCALE = 2;
 const SCALE_INCREMENT = 0.1;
 
-export function Settings({ scale, onScaleChange, theme, onThemeChange }: SettingsProps) {
+export function Settings({ scale, onScaleChange, theme, onThemeChange, onCategoriesChange }: SettingsProps) {
   const handleZoomIn = () => {
     const newScale = Math.min(MAX_SCALE, Math.round((scale + SCALE_INCREMENT) * 100) / 100);
     onScaleChange(newScale);
@@ -210,6 +212,9 @@ export function Settings({ scale, onScaleChange, theme, onThemeChange }: Setting
           </div>
         </CardContent>
       </Card>
+
+      {/* Categories */}
+      <CategoryManagement onCategoriesChange={onCategoriesChange} />
 
       {/* About */}
       <Card>
