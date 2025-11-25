@@ -1,9 +1,9 @@
-import { LayoutDashboard, Package, FileText, Upload, Download, Plus, Settings, Sun, Moon, Monitor } from "lucide-react";
+import { LayoutDashboard, Package, FileText, Upload, Download, Plus, Settings, Sun, Moon, Monitor, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-type View = "dashboard" | "assets" | "asset-detail" | "asset-form" | "reports" | "settings";
+type View = "dashboard" | "assets" | "asset-detail" | "reports" | "manual" | "settings";
 type Theme = "light" | "dark" | "system";
 
 interface SidebarProps {
@@ -29,12 +29,13 @@ export function Sidebar({
     { id: "dashboard" as View, label: "Dashboard", icon: LayoutDashboard },
     { id: "assets" as View, label: "Assets", icon: Package },
     { id: "reports" as View, label: "Reports", icon: FileText },
+    { id: "manual" as View, label: "Manual", icon: BookOpen },
     { id: "settings" as View, label: "Settings", icon: Settings },
   ];
 
   const isViewActive = (itemId: View) => {
     if (itemId === "assets") {
-      return ["assets", "asset-detail", "asset-form"].includes(currentView);
+      return ["assets", "asset-detail"].includes(currentView);
     }
     return currentView === itemId;
   };
