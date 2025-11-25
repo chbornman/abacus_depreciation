@@ -9,8 +9,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface DisposeDialogProps {
   open: boolean;
@@ -28,20 +29,19 @@ export function DisposeDialog({
   const [disposedDate, setDisposedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [disposedValue, setDisposedValue] = useState("");
+  const [disposedValue, setDisposedValue] = useState<number | undefined>(undefined);
 
   const handleConfirm = () => {
-    const value = disposedValue ? parseFloat(disposedValue) : null;
-    onConfirm(disposedDate, value);
+    onConfirm(disposedDate, disposedValue ?? null);
     // Reset form
     setDisposedDate(new Date().toISOString().split("T")[0]);
-    setDisposedValue("");
+    setDisposedValue(undefined);
   };
 
   const handleClose = () => {
     // Reset form
     setDisposedDate(new Date().toISOString().split("T")[0]);
-    setDisposedValue("");
+    setDisposedValue(undefined);
     onClose();
   };
 
@@ -65,11 +65,11 @@ export function DisposeDialog({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="dispose-date">Disposal Date</Label>
-            <Input
+            <DatePicker
               id="dispose-date"
-              type="date"
               value={disposedDate}
-              onChange={(e) => setDisposedDate(e.target.value)}
+              onChange={(value) => setDisposedDate(value)}
+              placeholder="Select disposal date"
             />
           </div>
 
@@ -80,14 +80,14 @@ export function DisposeDialog({
                 (optional)
               </span>
             </Label>
-            <Input
+            <NumberInput
               id="dispose-value"
-              type="number"
-              step="0.01"
-              min="0"
+              step={0.01}
+              min={0}
+              allowEmpty
               placeholder="Enter amount or leave blank"
-              value={disposedValue}
-              onChange={(e) => setDisposedValue(e.target.value)}
+              value={disposedValue ?? ""}
+              onChange={setDisposedValue}
             />
           </div>
         </div>

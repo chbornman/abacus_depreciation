@@ -1,5 +1,4 @@
-import { ChevronRight, Calculator } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calculator, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
@@ -12,17 +11,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatCurrency } from "@/lib/utils";
 import type { Asset, Category } from "@/types";
 
-interface AssetFormProps {
-  asset: Asset;
+interface AssetFormDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  asset: Asset | null;
   categories: Category[];
-  isEditing: boolean;
   onChange: <K extends keyof Asset>(field: K, value: Asset[K]) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
+  onSubmit: () => void;
 }
 
 const propertyClasses = [
@@ -36,41 +43,43 @@ const propertyClasses = [
   { value: "39", label: "39-year" },
 ];
 
-export function AssetForm({
+export function AssetFormDialog({
+  open,
+  onOpenChange,
   asset,
   categories,
-  isEditing,
   onChange,
   onSubmit,
-  onCancel,
-}: AssetFormProps) {
+}: AssetFormDialogProps) {
+  if (!asset) return null;
+
+  const isEditing = !!asset.id;
   const annualDepreciation =
     asset.cost > 0 && asset.useful_life_years > 0
       ? (asset.cost - asset.salvage_value) / asset.useful_life_years
       : 0;
 
-  return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm">
-        <button
-          onClick={onCancel}
-          className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors"
-        >
-          Assets
-        </button>
-        <ChevronRight className="h-4 w-4 text-[hsl(var(--muted-foreground))]" />
-        <span className="font-medium">{isEditing ? "Edit Asset" : "New Asset"}</span>
-      </div>
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit();
+  };
 
-      <form onSubmit={onSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>{isEditing ? "Edit Asset" : "Create New Asset"}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? "Edit Asset" : "Add Asset"}</DialogTitle>
+          <DialogDescription>
+            {isEditing
+              ? "Update the asset details below."
+              : "Enter the details for your new asset."}
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-6 py-4">
             {/* Basic Info */}
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">
                   Asset Name <span className="text-[hsl(var(--destructive))]">*</span>
@@ -142,7 +151,7 @@ export function AssetForm({
             </div>
 
             {/* Financial Info */}
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="cost">
                   Cost <span className="text-[hsl(var(--destructive))]">*</span>
@@ -179,6 +188,69 @@ export function AssetForm({
                   onChange={(value) => onChange("useful_life_years", value ?? 1)}
                 />
               </div>
+            </div>
+
+            {/* Status */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={asset.disposed_date ? "disposed" : "active"}
+                  onValueChange={(value) => {
+                    if (value === "active") {
+                      onChange("disposed_date", undefined);
+                      onChange("disposed_value", undefined);
+                    } else {
+                      onChange("disposed_date", new Date().toISOString().split("T")[0]);
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="disposed">Disposed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {asset.disposed_date && (
+                <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 space-y-4">
+                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                    <AlertCircle className="h-4 w-4" />
+                    <span className="text-sm font-medium">Disposal Information</span>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="disposed_date">
+                        Disposal Date <span className="text-[hsl(var(--destructive))]">*</span>
+                      </Label>
+                      <DatePicker
+                        id="disposed_date"
+                        value={asset.disposed_date}
+                        onChange={(value) => onChange("disposed_date", value)}
+                        placeholder="Select date"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="disposed_value">Sale/Disposal Value</Label>
+                      <NumberInput
+                        id="disposed_value"
+                        step={0.01}
+                        min={0}
+                        allowEmpty
+                        value={asset.disposed_value ?? ""}
+                        onChange={(value) => onChange("disposed_value", value)}
+                        placeholder="0.00"
+                      />
+                      <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                        Leave blank if scrapped with no value
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Description & Notes */}
@@ -223,19 +295,18 @@ export function AssetForm({
                 </div>
               </div>
             )}
+          </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button type="submit">
-                {isEditing ? "Save Changes" : "Create Asset"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </form>
-    </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!asset.name.trim()}>
+              {isEditing ? "Save Changes" : "Add Asset"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
