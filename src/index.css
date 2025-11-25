@@ -219,17 +219,6 @@ body {
   scroll-behavior: auto;
 }
 
-/* Isolate Recharts containers to prevent scroll jank */
-.recharts-responsive-container {
-  contain: layout paint style;
-}
-
-/* Put chart wrapper divs on their own compositing layer */
-.recharts-wrapper {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

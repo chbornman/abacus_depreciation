@@ -9,6 +9,7 @@ import {
   Dashboard,
   AssetList,
   AssetDetail,
+  Analysis,
   Reports,
   Manual,
   Settings,
@@ -27,7 +28,7 @@ import { defaultAssetFilters } from "@/types";
 
 import "@/index.css";
 
-type View = "dashboard" | "assets" | "asset-detail" | "reports" | "manual" | "settings";
+type View = "dashboard" | "assets" | "asset-detail" | "analysis" | "reports" | "manual" | "settings";
 
 const STORAGE_KEY_SCALE = "abacus-ui-scale";
 const STORAGE_KEY_THEME = "abacus-theme";
@@ -289,7 +290,15 @@ function App() {
             annualSummary={annualSummary}
             currentYear={currentYear}
             onViewAsset={handleViewAsset}
-            onViewAllAssets={() => navigateTo("assets")}
+            onNavigate={navigateTo}
+          />
+        );
+      case "analysis":
+        return (
+          <Analysis
+            assets={assets}
+            annualSummary={annualSummary}
+            currentYear={currentYear}
             onFilterByCategory={handleFilterByCategory}
           />
         );
@@ -356,8 +365,8 @@ function App() {
         onThemeChange={handleThemeChange}
       />
 
-      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
-        <div className="p-6 lg:p-8 max-w-full">{renderView()}</div>
+      <main className={`flex-1 min-w-0 overflow-x-hidden ${view === "analysis" ? "overflow-hidden" : "overflow-y-auto"}`}>
+        <div className={`max-w-full ${view === "analysis" ? "p-4 h-full" : "p-6 lg:p-8"}`}>{renderView()}</div>
       </main>
 
       {/* Asset Form Dialog */}

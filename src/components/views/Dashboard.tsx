@@ -1,23 +1,11 @@
-import { useState, useMemo } from "react";
-import { TrendingUp, DollarSign, Calculator, Briefcase, ChevronRight, Package, Calendar } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package, BarChart3, FileText, ChevronRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  CategoryPieChart,
-  DepreciationBarChart,
-  BookValueAreaChart,
-  type TimeRange,
-} from "@/components/charts/DashboardCharts";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import type { DashboardStats, AssetWithSchedule, AnnualSummary } from "@/types";
+
+type View = "assets" | "analysis" | "reports";
 
 interface DashboardProps {
   stats: DashboardStats | null;
@@ -25,8 +13,7 @@ interface DashboardProps {
   annualSummary: AnnualSummary[];
   currentYear: number;
   onViewAsset: (asset: AssetWithSchedule) => void;
-  onViewAllAssets: () => void;
-  onFilterByCategory: (categoryName: string) => void;
+  onNavigate: (view: View) => void;
 }
 
 export function Dashboard({
@@ -35,83 +22,34 @@ export function Dashboard({
   annualSummary,
   currentYear,
   onViewAsset,
-  onViewAllAssets,
-  onFilterByCategory,
+  onNavigate,
 }: DashboardProps) {
-  const [timeRange, setTimeRange] = useState<TimeRange>("next5");
-
-  // Compute actual year range for display
-  const yearRangeInfo = useMemo(() => {
-    if (annualSummary.length === 0) return null;
-
-    const allYears = annualSummary.map(s => s.year).sort((a, b) => a - b);
-    const minYear = allYears[0];
-    const maxYear = allYears[allYears.length - 1];
-
-    let startYear: number;
-    let endYear: number;
-
-    switch (timeRange) {
-      case "1y":
-        startYear = currentYear;
-        endYear = currentYear;
-        break;
-      case "next5":
-        startYear = currentYear;
-        endYear = currentYear + 4;
-        break;
-      case "next10":
-        startYear = currentYear;
-        endYear = currentYear + 9;
-        break;
-      default: // "all"
-        startYear = minYear;
-        endYear = maxYear;
-    }
-
-    // Clamp to available data
-    startYear = Math.max(startYear, minYear);
-    endYear = Math.min(endYear, maxYear);
-
-    const filteredCount = annualSummary.filter(
-      s => s.year >= startYear && s.year <= endYear
-    ).length;
-
-    return {
-      startYear,
-      endYear,
-      totalYears: allYears.length,
-      filteredYears: filteredCount,
-      label: startYear === endYear
-        ? `${startYear}`
-        : `${startYear} – ${endYear}`,
-    };
-  }, [annualSummary, timeRange, currentYear]);
-
-  const statCards = stats
-    ? [
-        {
-          title: "Total Assets",
-          value: formatNumber(stats.total_assets),
-          icon: Briefcase,
-        },
-        {
-          title: `${currentYear} Depreciation`,
-          value: formatCurrency(stats.current_year_depreciation),
-          icon: TrendingUp,
-        },
-        {
-          title: "Total Book Value",
-          value: formatCurrency(stats.total_book_value),
-          icon: Calculator,
-        },
-        {
-          title: "Total Cost",
-          value: formatCurrency(stats.total_cost),
-          icon: DollarSign,
-        },
-      ]
-    : [];
+  const navCards = [
+    {
+      id: "assets" as View,
+      title: "Assets",
+      icon: Package,
+      value: stats ? formatNumber(stats.total_assets) : "0",
+      subtitle: "Total assets",
+      valueClass: "",
+    },
+    {
+      id: "analysis" as View,
+      title: "Analysis",
+      icon: BarChart3,
+      value: stats ? formatCurrency(stats.current_year_depreciation) : "$0",
+      subtitle: `${currentYear} depreciation`,
+      valueClass: "",
+    },
+    {
+      id: "reports" as View,
+      title: "Reports",
+      icon: FileText,
+      value: stats ? formatCurrency(stats.total_book_value) : "$0",
+      subtitle: "Book value",
+      valueClass: "text-success",
+    },
+  ];
 
   return (
     <div className="space-y-8">
@@ -123,98 +61,32 @@ export function Dashboard({
         </p>
       </div>
 
-      {/* Stats Grid */}
-      {stats && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {statCards.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card
-                key={index}
-                className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
-                  <Icon className="h-5 w-5 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
+      {/* Navigation Cards */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {navCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <button
+              key={card.id}
+              onClick={() => onNavigate(card.id)}
+              className="text-left"
+            >
+              <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 to-transparent transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
+                <CardContent className="p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="rounded-xl bg-primary/10 p-4">
+                      <Icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-2xl font-semibold">{card.title}</h3>
+                  </div>
+                  <div className={`text-4xl font-bold mb-2 ${card.valueClass}`}>{card.value}</div>
+                  <p className="text-muted-foreground">{card.subtitle}</p>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Portfolio Composition - Always shows all assets */}
-      {assets.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">Portfolio Composition</h2>
-              <p className="text-sm text-muted-foreground">
-                All {assets.length} assets by category • Click to filter
-              </p>
-            </div>
-          </div>
-          <CategoryPieChart assets={assets} onCategoryClick={onFilterByCategory} />
-        </div>
-      )}
-
-      {/* Depreciation Trends - Time filtered */}
-      {annualSummary.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">Depreciation Trends</h2>
-              <p className="text-sm text-muted-foreground">
-                Track depreciation expenses and book value over time
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Full Schedule</SelectItem>
-                  <SelectItem value="next10">Next 10 Years</SelectItem>
-                  <SelectItem value="next5">Next 5 Years</SelectItem>
-                  <SelectItem value="1y">This Year</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Time Range Indicator */}
-          {yearRangeInfo && timeRange !== "all" && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground rounded-lg bg-muted/50 px-3 py-2 w-fit">
-              <Calendar className="h-4 w-4" />
-              <span>
-                Showing <span className="font-medium text-foreground">{yearRangeInfo.label}</span>
-                {yearRangeInfo.filteredYears !== yearRangeInfo.totalYears && (
-                  <span> ({yearRangeInfo.filteredYears} of {yearRangeInfo.totalYears} years)</span>
-                )}
-              </span>
-            </div>
-          )}
-
-          <div className="grid gap-4 grid-cols-1">
-            <DepreciationBarChart
-              annualSummary={annualSummary}
-              currentYear={currentYear}
-              timeRange={timeRange}
-            />
-            <BookValueAreaChart
-              assets={assets}
-              currentYear={currentYear}
-              timeRange={timeRange}
-            />
-          </div>
-        </div>
-      )}
+            </button>
+          );
+        })}
+      </div>
 
       {/* Recent Assets */}
       <div className="space-y-4">
@@ -226,7 +98,7 @@ export function Dashboard({
             </p>
           </div>
           {assets.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={onViewAllAssets}>
+            <Button variant="ghost" size="sm" onClick={() => onNavigate("assets")}>
               View All
               <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
