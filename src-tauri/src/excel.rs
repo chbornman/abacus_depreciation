@@ -1,6 +1,7 @@
 use crate::db::Database;
 use crate::depreciation::generate_schedule;
 use crate::models::*;
+use crate::validation;
 use calamine::{open_workbook, DataType, Reader, Xlsx};
 use chrono::Datelike;
 use rusqlite::params;
@@ -36,13 +37,21 @@ pub fn import_assets_from_excel(db: State<Database>, file_path: String) -> Resul
             continue;
         }
 
-        let result = parse_asset_row(row, row_idx + 1);
+        let row_num = row_idx + 1;
+        let result = parse_asset_row(row, row_num);
         match result {
-            Ok(asset_import) => match insert_imported_asset(&db, asset_import) {
-                Ok(_) => imported += 1,
-                Err(e) => errors.push(format!("Row {}: {}", row_idx + 1, e)),
-            },
-            Err(e) => errors.push(format!("Row {}: {}", row_idx + 1, e)),
+            Ok(asset_import) => {
+                // Validate the parsed asset before inserting
+                if let Err(e) = validation::validate_asset_import(&asset_import, row_num) {
+                    errors.push(e.to_string());
+                    continue;
+                }
+                match insert_imported_asset(&db, asset_import) {
+                    Ok(_) => imported += 1,
+                    Err(e) => errors.push(format!("Row {}: {}", row_num, e)),
+                }
+            }
+            Err(e) => errors.push(format!("Row {}: {}", row_num, e)),
         }
     }
 
@@ -258,15 +267,15 @@ pub fn export_template(file_path: String) -> Result<()> {
         .map_err(map_err)?;
 
     // Set column widths
-    worksheet.set_column_width(0, 20).map_err(map_err)?;
-    worksheet.set_column_width(1, 25).map_err(map_err)?;
-    worksheet.set_column_width(2, 15).map_err(map_err)?;
-    worksheet.set_column_width(3, 22).map_err(map_err)?;
-    worksheet.set_column_width(4, 12).map_err(map_err)?;
-    worksheet.set_column_width(5, 14).map_err(map_err)?;
-    worksheet.set_column_width(6, 18).map_err(map_err)?;
-    worksheet.set_column_width(7, 14).map_err(map_err)?;
-    worksheet.set_column_width(8, 30).map_err(map_err)?;
+    worksheet.set_column_width(0, 25).map_err(map_err)?; // Asset Name
+    worksheet.set_column_width(1, 30).map_err(map_err)?; // Description
+    worksheet.set_column_width(2, 20).map_err(map_err)?; // Category
+    worksheet.set_column_width(3, 22).map_err(map_err)?; // Date Placed in Service
+    worksheet.set_column_width(4, 15).map_err(map_err)?; // Cost
+    worksheet.set_column_width(5, 15).map_err(map_err)?; // Salvage Value
+    worksheet.set_column_width(6, 20).map_err(map_err)?; // Useful Life (Years)
+    worksheet.set_column_width(7, 15).map_err(map_err)?; // Property Class
+    worksheet.set_column_width(8, 35).map_err(map_err)?; // Notes
 
     workbook.save(&file_path).map_err(map_err)?;
     Ok(())
@@ -364,9 +373,14 @@ pub fn export_depreciation_report(db: State<Database>, file_path: String) -> Res
             worksheet.write_string(row, 7, status).map_err(map_err)?;
         }
 
-        worksheet.set_column_width(0, 25).map_err(map_err)?;
-        worksheet.set_column_width(1, 15).map_err(map_err)?;
-        worksheet.set_column_width(6, 18).map_err(map_err)?;
+        worksheet.set_column_width(0, 30).map_err(map_err)?; // Asset Name
+        worksheet.set_column_width(1, 20).map_err(map_err)?; // Category
+        worksheet.set_column_width(2, 15).map_err(map_err)?; // Cost
+        worksheet.set_column_width(3, 15).map_err(map_err)?; // Salvage Value
+        worksheet.set_column_width(4, 12).map_err(map_err)?; // Life (Yrs)
+        worksheet.set_column_width(5, 15).map_err(map_err)?; // Service Date
+        worksheet.set_column_width(6, 20).map_err(map_err)?; // Current Book Value
+        worksheet.set_column_width(7, 12).map_err(map_err)?; // Status
     }
 
     // Sheet 2: Depreciation Schedule
@@ -432,7 +446,12 @@ pub fn export_depreciation_report(db: State<Database>, file_path: String) -> Res
                 .map_err(map_err)?;
         }
 
-        worksheet.set_column_width(0, 25).map_err(map_err)?;
+        worksheet.set_column_width(0, 30).map_err(map_err)?; // Asset Name
+        worksheet.set_column_width(1, 10).map_err(map_err)?; // Year
+        worksheet.set_column_width(2, 18).map_err(map_err)?; // Beginning Value
+        worksheet.set_column_width(3, 15).map_err(map_err)?; // Depreciation
+        worksheet.set_column_width(4, 15).map_err(map_err)?; // Accumulated
+        worksheet.set_column_width(5, 15).map_err(map_err)?; // Ending Value
     }
 
     // Sheet 3: Annual Summary
@@ -474,6 +493,10 @@ pub fn export_depreciation_report(db: State<Database>, file_path: String) -> Res
                 .write_number(row, 2, *count as f64)
                 .map_err(map_err)?;
         }
+
+        worksheet.set_column_width(0, 10).map_err(map_err)?; // Year
+        worksheet.set_column_width(1, 20).map_err(map_err)?; // Total Depreciation
+        worksheet.set_column_width(2, 15).map_err(map_err)?; // Asset Count
     }
 
     workbook.save(&file_path).map_err(map_err)?;
