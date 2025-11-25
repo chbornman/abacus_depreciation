@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Tailwind v4 Theme */
 @theme {
@@ -178,11 +179,17 @@ body {
 
 /* App container - fills viewport and handles zoom scaling */
 .app-container {
-  /* Use dvh/dvw for dynamic viewport units that work better with zoom */
-  min-height: 100dvh;
-  min-width: 100dvw;
-  max-height: 100dvh;
-  max-width: 100dvw;
+  /* GPU acceleration for smooth scrolling */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize scrollable areas */
+.app-container main {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: auto;
+  /* Create compositing layer for scroll performance */
+  will-change: scroll-position;
 }
 
 /* Scrollbar styling */
