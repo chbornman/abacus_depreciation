@@ -3,14 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import type { DashboardStats, AssetWithSchedule, AnnualSummary } from "@/types";
+import type { DashboardStats, AssetWithSchedule } from "@/types";
 
 type View = "assets" | "analysis" | "reports";
 
 interface DashboardProps {
   stats: DashboardStats | null;
   assets: AssetWithSchedule[];
-  annualSummary: AnnualSummary[];
   currentYear: number;
   onViewAsset: (asset: AssetWithSchedule) => void;
   onNavigate: (view: View) => void;
@@ -19,7 +18,6 @@ interface DashboardProps {
 export function Dashboard({
   stats,
   assets,
-  annualSummary,
   currentYear,
   onViewAsset,
   onNavigate,

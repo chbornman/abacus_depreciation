@@ -40,7 +40,7 @@ pub fn validate_asset(asset: &Asset) -> Result<()> {
     // Date placed in service
     if asset.date_placed_in_service.trim().is_empty() {
         errors.push("Date placed in service is required".to_string());
-    } else if let Err(_) = parse_date(&asset.date_placed_in_service) {
+    } else if parse_date(&asset.date_placed_in_service).is_err() {
         errors.push("Invalid date format for date placed in service (use YYYY-MM-DD)".to_string());
     } else if is_future_date(&asset.date_placed_in_service) {
         errors.push("Date placed in service cannot be in the future".to_string());
@@ -89,7 +89,7 @@ pub fn validate_asset(asset: &Asset) -> Result<()> {
     if let Some(ref disposed_date) = asset.disposed_date {
         if disposed_date.trim().is_empty() {
             errors.push("Disposal date cannot be empty once set".to_string());
-        } else if let Err(_) = parse_date(disposed_date) {
+        } else if parse_date(disposed_date).is_err() {
             errors.push("Invalid disposal date format (use YYYY-MM-DD)".to_string());
         } else {
             if is_future_date(disposed_date) {
@@ -173,7 +173,7 @@ pub fn validate_asset_import(import: &AssetImport, row_num: usize) -> Result<()>
     // Date validation
     if import.date_placed_in_service.trim().is_empty() {
         errors.push(format!("{}: Date placed in service is required", prefix));
-    } else if let Err(_) = parse_date(&import.date_placed_in_service) {
+    } else if parse_date(&import.date_placed_in_service).is_err() {
         errors.push(format!(
             "{}: Invalid date format '{}' (use YYYY-MM-DD)",
             prefix, import.date_placed_in_service
@@ -230,7 +230,7 @@ pub fn validate_disposal(
     // Disposed date validation
     if disposed_date.trim().is_empty() {
         errors.push("Disposal date is required".to_string());
-    } else if let Err(_) = parse_date(disposed_date) {
+    } else if parse_date(disposed_date).is_err() {
         errors.push("Invalid disposal date format (use YYYY-MM-DD)".to_string());
     } else {
         if is_future_date(disposed_date) {

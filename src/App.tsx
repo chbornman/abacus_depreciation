@@ -287,7 +287,6 @@ function App() {
           <Dashboard
             stats={stats}
             assets={assets}
-            annualSummary={annualSummary}
             currentYear={currentYear}
             onViewAsset={handleViewAsset}
             onNavigate={navigateTo}
