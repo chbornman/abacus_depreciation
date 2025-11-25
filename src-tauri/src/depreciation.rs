@@ -132,6 +132,8 @@ mod tests {
             notes: None,
             disposed_date: None,
             disposed_value: None,
+            created_at: None,
+            updated_at: None,
         };
 
         let schedule = generate_schedule(&asset);

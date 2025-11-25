@@ -55,6 +55,8 @@ pub fn get_dashboard_stats(db: State<Database>) -> Result<DashboardStats> {
                 notes: row.get(9)?,
                 disposed_date: row.get(10)?,
                 disposed_value: row.get(11)?,
+                created_at: row.get(12)?,
+                updated_at: row.get(13)?,
             })
         })
         .map_err(map_err)?
@@ -85,7 +87,7 @@ pub fn get_dashboard_stats(db: State<Database>) -> Result<DashboardStats> {
 pub fn get_categories(db: State<Database>) -> Result<Vec<Category>> {
     let conn = db.conn.lock().map_err(map_err)?;
     let mut stmt = conn
-        .prepare("SELECT id, name, default_useful_life, default_property_class FROM categories ORDER BY name")
+        .prepare("SELECT id, name, default_useful_life, default_property_class, created_at, updated_at FROM categories ORDER BY name")
         .map_err(map_err)?;
 
     let categories = stmt
@@ -95,6 +97,8 @@ pub fn get_categories(db: State<Database>) -> Result<Vec<Category>> {
                 name: row.get(1)?,
                 default_useful_life: row.get(2)?,
                 default_property_class: row.get(3)?,
+                created_at: row.get(4)?,
+                updated_at: row.get(5)?,
             })
         })
         .map_err(map_err)?
@@ -128,7 +132,7 @@ pub fn update_category(db: State<Database>, category: Category) -> Result<()> {
     let id = category.id.ok_or("Category ID required")?;
 
     conn.execute(
-        "UPDATE categories SET name = ?1, default_useful_life = ?2, default_property_class = ?3 WHERE id = ?4",
+        "UPDATE categories SET name = ?1, default_useful_life = ?2, default_property_class = ?3, updated_at = CURRENT_TIMESTAMP WHERE id = ?4",
         params![category.name.trim(), category.default_useful_life, category.default_property_class, id],
     )
     .map_err(map_err)?;
@@ -203,7 +207,7 @@ pub fn get_categories_with_counts(db: State<Database>) -> Result<Vec<CategoryWit
     let mut stmt = conn
         .prepare(
             "SELECT c.id, c.name, c.default_useful_life, c.default_property_class,
-                    COUNT(a.id) as asset_count
+                    c.created_at, c.updated_at, COUNT(a.id) as asset_count
              FROM categories c
              LEFT JOIN assets a ON c.id = a.category_id
              GROUP BY c.id
@@ -218,7 +222,9 @@ pub fn get_categories_with_counts(db: State<Database>) -> Result<Vec<CategoryWit
                 name: row.get(1)?,
                 default_useful_life: row.get(2)?,
                 default_property_class: row.get(3)?,
-                asset_count: row.get(4)?,
+                created_at: row.get(4)?,
+                updated_at: row.get(5)?,
+                asset_count: row.get(6)?,
             })
         })
         .map_err(map_err)?
@@ -239,7 +245,7 @@ pub fn get_assets(db: State<Database>) -> Result<Vec<AssetWithSchedule>> {
             "SELECT a.*, c.name as category_name
              FROM assets a
              LEFT JOIN categories c ON a.category_id = c.id
-             ORDER BY a.name",
+             ORDER BY a.updated_at DESC",
         )
         .map_err(map_err)?;
 
@@ -259,6 +265,8 @@ pub fn get_assets(db: State<Database>) -> Result<Vec<AssetWithSchedule>> {
                     notes: row.get(9)?,
                     disposed_date: row.get(10)?,
                     disposed_value: row.get(11)?,
+                    created_at: row.get(12)?,
+                    updated_at: row.get(13)?,
                 },
                 row.get(14)?, // category_name
             ))
@@ -306,6 +314,8 @@ pub fn get_asset(db: State<Database>, id: i64) -> Result<AssetWithSchedule> {
                         notes: row.get(9)?,
                         disposed_date: row.get(10)?,
                         disposed_value: row.get(11)?,
+                        created_at: row.get(12)?,
+                        updated_at: row.get(13)?,
                     },
                     row.get::<_, Option<String>>(14)?,
                 ))

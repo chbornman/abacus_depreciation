@@ -3,6 +3,8 @@ export interface Category {
   name: string;
   default_useful_life?: number;
   default_property_class?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CategoryWithCount {
@@ -10,6 +12,8 @@ export interface CategoryWithCount {
   name: string;
   default_useful_life?: number;
   default_property_class?: string;
+  created_at?: string;
+  updated_at?: string;
   asset_count: number;
 }
 
@@ -26,6 +30,8 @@ export interface Asset {
   notes?: string;
   disposed_date?: string;
   disposed_value?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface DepreciationEntry {

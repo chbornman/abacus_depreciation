@@ -295,6 +295,8 @@ mod tests {
             notes: None,
             disposed_date: None,
             disposed_value: None,
+            created_at: None,
+            updated_at: None,
         }
     }
 
@@ -305,6 +307,8 @@ mod tests {
             name: "Equipment".to_string(),
             default_useful_life: Some(5),
             default_property_class: Some("5".to_string()),
+            created_at: None,
+            updated_at: None,
         }
     }
 
@@ -345,6 +349,8 @@ mod tests {
             notes: None,
             disposed_date: None,
             disposed_value: None,
+            created_at: None,
+            updated_at: None,
         };
         assert!(validate_asset(&asset).is_ok());
     }
@@ -669,6 +675,8 @@ mod tests {
             notes: None,
             disposed_date: None,
             disposed_value: None,
+            created_at: None,
+            updated_at: None,
         };
         let result = validate_asset(&asset);
         assert!(result.is_err());
@@ -693,6 +701,8 @@ mod tests {
             name: "Basic".to_string(),
             default_useful_life: None,
             default_property_class: None,
+            created_at: None,
+            updated_at: None,
         };
         assert!(validate_category(&category).is_ok());
     }

@@ -84,10 +84,9 @@ impl Database {
             .unwrap_or(false);
 
         if !has_updated_at {
-            conn.execute(
-                "ALTER TABLE categories ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP",
-                [],
-            )?;
+            // SQLite doesn't allow non-constant defaults in ALTER TABLE, so add column then update
+            conn.execute("ALTER TABLE categories ADD COLUMN updated_at DATETIME", [])?;
+            conn.execute("UPDATE categories SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL", [])?;
         }
 
         Ok(())

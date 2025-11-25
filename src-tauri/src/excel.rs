@@ -199,6 +199,8 @@ fn insert_imported_asset(db: &State<Database>, import: AssetImport) -> Result<i6
         notes: import.notes,
         disposed_date: None,
         disposed_value: None,
+        created_at: None,
+        updated_at: None,
     };
 
     let schedule = generate_schedule(&asset);
@@ -331,6 +333,8 @@ pub fn export_depreciation_report(db: State<Database>, file_path: String) -> Res
                         notes: row.get(9)?,
                         disposed_date: row.get(10)?,
                         disposed_value: row.get(11)?,
+                        created_at: row.get(12)?,
+                        updated_at: row.get(13)?,
                     },
                     row.get(14)?,
                 ))
